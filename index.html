@@ -1,97 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>CSCE 190: Jaira Settles</title>
-<link rel="stylesheet" type="text/css" href="stylesGP.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaira Settles | Computer Engineering Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<h1>Jaira Settles</h1>
+    <header class="hero">
+        <div class="container">
+            <h1>Jaira Settles</h1>
+            <p class="subtitle">Computer Engineering Sophomore | Embedded Systems & Object-Oriented Software</p>
+            <p class="profile-link">GitHub: <a href="https://github.com/Jai07-Dot" target="_blank">@Jai07-Dot</a></p>
+            <div class="tags">
+                <span>C++</span>
+                <span>Java</span>
+                <span>Arduino Hardware</span>
+                <span>Systems Architecture</span>
+            </div>
+        </div>
+    </header>
 
-<!-- About Me -->
-<div class="box">
-    <h2>About me</h2>
-    <p>My mission is to become highly skilled in the career that I am very passionate about.</p>
-</div>
+    <main class="container">
+        
+        <section id="about">
+            <h2>🎯 Professional Summary</h2>
+            <hr>
+            <div class="card summary-card">
+                <p>I am a Computer Engineering student focused on bridging the gap between low-level hardware constraints and high-level software architectures. Driven by a "build-to-learn" methodology, my portfolio represents an intensive engineering sprint where I transitioned foundational, linear scripts into complex, adaptive systems.</p>
+                <p>Rather than treating software and hardware as isolated disciplines, my projects focus on cross-platform integration—building responsive digital applications whose logic states directly mirror and optimize physical microcontroller execution limits.</p>
+            </div>
+        </section>
+        
+        <section id="portfolio-showcase">
+            <h2>🛠️ Engineering Project Index</h2>
+            <hr>
+            
+            <div class="card project-card hardware">
+                <div class="card-header">
+                    <h3>Autonomous Robotic Tracking Pet</h3>
+                    <span class="badge badge-hardware">Embedded C++</span>
+                </div>
+                <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/myblinks" target="_blank">/myblinks</a></p>
+                <p>A physical, mobile robot dog engineered to scan complex environments and autonomously track moving human targets using real-time spatial sonar feedback vectors.</p>
+                <ul>
+                    <li><strong>Finite State Machine (FSM):</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code>.</li>
+                    <li><strong>Asynchronous Processing:</strong> Conquered timing constraints using <code>millis()</code> architectures to handle concurrent sensor reads, wheel adjustments, and sound modulation loops without processor lockups.</li>
+                    <li><strong>Radar Matrix Tracking:</strong> Mounted a sonar array to an active servo axis to feed directional tracking arrays into a custom differential steering mixer.</li>
+                </ul>
+            </div>
 
-<!-- Resume Links -->
-<div class="box">
-    <a href="https://jai07-dot.github.io/resume.html">
-        <h3>View Resume (HTML)</h3>
-    </a>
+            <div class="card project-card software">
+                <div class="card-header">
+                    <h3>Object-Oriented Application Suite</h3>
+                    <span class="badge badge-software">Java Core</span>
+                </div>
+                
+                <div class="sub-project">
+                    <h4>The Haunted Waltz 5.0</h4>
+                    <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/HauntedMaze" target="_blank">/HauntedMaze</a></p>
+                    <p>A hybrid 2D graphical game combining a real-time vector rendering engine with a branching narrative choice matrix spanning 10 alternative endings. Features an automated scaling latency engine that tracks player fear input variables.</p>
+                </div>
 
-    <a href="resume engineering (1).pdf">
-        <h3>View Resume (PDF)</h3>
-    </a>
-</div>
+                <div class="sub-project">
+                    <h4>Classic Pacman Engine Re-creation</h4>
+                    <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/PacMan" target="_blank">/PacMan</a></p>
+                    <p>An arcade engine automated iteration exploring multi-axis boundary tracking, character tile-grid array alignments, and keyboard input interrupt mechanics.</p>
+                </div>
 
-<!-- Skills -->
-<div class="box">
-    <h2>Skills</h2>
-    <p>Problem-solving, Critical Thinking, Teamwork, Attention to detail, Adaptability, Time Management</p>
-</div>
+                <div class="sub-project">
+                    <h4>Sudoku Generator & Solver</h4>
+                    <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/SudokuGame" target="_blank">/SudokuGame</a></p>
+                    <p>A mathematical matrix application utilizing recursive backtracking algorithms to calculate mathematical solution spaces instantly.</p>
+                </div>
 
-<!-- Contact -->
-<div class="box">
-    <h2>Contact me</h2>
-    <p>Settlesr@email.sc.edu</p>
-</div>
+                <div class="sub-project">
+                    <h4>Blackjack Simulator & Dealer AI</h4>
+                    <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/Blackjack" target="_blank">/Blackjack</a></p>
+                    <p>A state-tracking script implementing automated array sorting, dealer constraint trees, and session bankroll metric data tracking.</p>
+                </div>
 
-<!-- Projects Header -->
-<div class="box">
-    <h2>Highlighted Projects</h2>
+                <div class="sub-project">
+                    <h4>Expression-Parsing Calculator</h4>
+                    <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/RegCalculator" target="_blank">/RegCalculator</a></p>
+                    <p>A syntax-processing tool designed to evaluate algebraic string formatting variations, handling orders of operations across dynamic layouts.</p>
+                </div>
+            </div>
+        </section>
 
+        <section id="post-mortem">
+            <h2>🛠️ Hardware & Software Integration Post-Mortem</h2>
+            <p class="section-intro">A precise log of core architectural vulnerabilities caught, diagnosed, and corrected during the development lifecycle.</p>
+            <hr>
 
-<!-- Java Project -->
-    <section class="project">
-        <a href="https://github.com/Jai07-Dot/JavaCodeCSCE145">
-            <h3>CSCE 145 Projects</h3>
-        </a>
-        <a href="https://github.com/Jai07-Dot/JavaCodeCSCE145">
-            <img src="Javalogo.png" alt="Java Logo">
-        </a>
-        <p>This includes the code I created during my CSCE 145 class.</p>
-    </section>
-</div>
+            <div class="card">
+                <h3 class="section-subtitle text-software">💻 Java Application Suite Failures</h3>
+                
+                <div class="error-block">
+                    <h4>Project: The Haunted Waltz 5.0 — The "Forever Right" Tracking Glitch</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Duplicate logic incrementation within the vector calculus pipeline.</p>
+                    <pre><code>if (ghostX < playerX) nextX++;
+else if (ghostX > playerX) nextX++; // &lt;-- The Bug</code></pre>
+                    <p><strong>System Failure:</strong> Instead of decrementing when the target was to its left, the asset incremented regardless, causing it to flee from the player and run into a permanent boundary lock.</p>
+                    <p><strong>Resolution:</strong> Refactored the second operational branch to cleanly handle symmetrical decrement calculations: <code>nextX--</code>.</p>
+                </div>
 
-<!-- Problem Statement -->
-<div class="box">
-    <section class="project">
-         <h2>Problem Statement</h2>
-        <a href="MissionStatementdetailed/Mission Statement (1).pdf">
-            <h3> Mission Statement <h3>
-        </a>
-        <a href="MissionStatement/MissionStatement.jpg">
-            <img src="MissionStatement/MissionStatement.jpg" alt="Problem Statement Image">
-        </a>
-        <p>Students need a free educational app that helps them learn at their own pace.</p>
-    </section>
-</div>
+                <div class="error-block">
+                    <h4>Project: Pac-Man Engine — Open-Corridor State Starvation</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Constraining tracking AI updates exclusively to structural collision handlers.</p>
+                    <p><strong>System Failure:</strong> Entering an open horizontal corridor without wall intersections starved the state engine. Lacking boundary collision triggers, the AI became locked in an infinite left-to-right loop, passing vertical corridors completely.</p>
+                    <p><strong>Resolution:</strong> Introduced a non-blocking 10% stochastic random weight parameter calculated instantly upon grid alignment coordinates to split tracking vectors organically.</p>
+                </div>
 
-<!-- Affinity Diagram -->
-<div class="box">
-    <section class="project">
-        <a href="MissionStatement/Sources (1).pdf"><h3>Affinity Diagram</h3></a>
-        <a href="MissionStatement/Sources (1).pdf">
-            <img src="Sources (1).png" alt="Affinity Diagram">
-        </a>
-        <p>The diagram shows problems I might face and ways I plan to fund the app.</p>
-    </section>
-</div>
+                <div class="error-block">
+                    <h4>Project: Pac-Man Engine — Over-Engineered Intersection Twitch</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Unbounded mathematical execution checks running at rigid grid boundaries on every frame tick.</p>
+                    <p><strong>System Failure:</strong> Caused erratic trajectory jittering as tracking units evaluated reverse directions on back-to-back frames, locking themselves into micro-stutter loops.</p>
+                    <p><strong>Resolution:</strong> Normalized coordinate bounds thresholds and implemented the 10% movement variance limits to stabilize entity headings.</p>
+                </div>
 
-<!-- Sketches -->
-<div class="box">
-   <section class="project">
-    <a href="MissionStatement/CSCE190-Sketches.pdf">
-        <h3>Sketches</h3>
-    </a>
-    <a href="MissionStatement/CSCE190-Sketches.pdf">
-        <img src="MissionStatement/CSCE190-Sketches.jpeg" alt="App Sketches" />
-        </a>
-        <p>These sketches show the functions and design of my educational app.</p>
-    </section>
-</div>
+                <div class="error-block">
+                    <h4>Project: The Haunted Waltz 5.0 — Illegal Matrix Index Evaluation</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Incorrect vector variable parsing within the boundary evaluation logic.</p>
+                    <pre><code>if (currentMaze[ghostY][nextX] == 0) // &lt;-- The Bug</code></pre>
+                    <p><strong>System Failure:</strong> Evaluated the current row position using horizontal test steps instead of checking the targeted row index. This caused path clipping or threw fatal <code>ArrayIndexOutOfBoundsException</code> crashes near map edges.</p>
+                    <p><strong>Resolution:</strong> Re-indexed variables to guarantee explicit verification of the targeted vector space: <code>currentMaze[nextY][ghostX] == 0</code>.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Pac-Man Engine — Multi-System Session Wipe</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Coupling local character positional resets directly to global initialization states.</p>
+                    <p><strong>System Failure:</strong> Triggering a collision cleanly deducted life points, but calling the comprehensive <code>resetGame()</code> method accidentally re-initialized session scores to 0 and lives to 3, masking valid terminal game states.</p>
+                    <p><strong>Resolution:</strong> Isolated logic blocks by writing a modular <code>resetPositions()</code> method to manipulate coordinate arrays while safeguarding game state primitives.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: The Haunted Waltz 5.0 — Synchronous Thread Freezing</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Porting blocking console IO structures into asynchronous graphic event pipelines.</p>
+                    <p><strong>System Failure:</strong> Calling <code>sc.nextLine()</code> halted execution of the graphics thread while waiting for manual text entry, starving display refresh registers and locking the window system UI layer.</p>
+                    <p><strong>Resolution:</strong> Completely dropped Scanner logic dependencies and migrated choices into asynchronous modal <code>JOptionPane.showOptionDialog</code> modules.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="section-subtitle text-hardware">🤖 Arduino Embedded Systems Failures</h3>
+
+                <div class="error-block">
+                    <h4>Project: Autonomous Robotic Tracking Pet — The "Frozen Brain" Sound Bug</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Running high-latency blocking <code>delay()</code> lines inside computational loops.</p>
+                    <p><strong>System Failure:</strong> Calling delays stopped the ATmega328P internal clock cycle. During vocalization routines, the robot completely missed distance tracking pulses, causing it to overshoot targets or drop sensor commands.</p>
+                    <p><strong>Resolution:</strong> Removed blocking delays and re-architected all time-based intervals around non-blocking timestamp subtractions running on background <code>millis()</code> counters.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Autonomous Robotic Tracking Pet — Multi-Peripheral Control Interference</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Hardware timer resource collisions across adjacent peripheral communication classes.</p>
+                    <p><strong>System Failure:</strong> High-frequency sound production routines clashed with PWM registers assigned to the H-bridge drivers and active tracking servo, leading to severe signal chatter and motor torque dropouts.</p>
+                    <p><strong>Resolution:</strong> Remapped internal peripheral channels to guarantee that audio frequencies, PWM speeds, and tracking servos operate on non-conflicting clock registers.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Autonomous Robotic Tracking Pet — Rigid Linear Pathfinding Limits</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Driving physical kinematics via a narrow, fixed 15-degree spatial detection envelope.</p>
+                    <p><strong>System Failure:</strong> Moving tracking targets easily breached the narrow sensor array limit, breaking tracking routines and throwing the robot into standby loops.</p>
+                    <p><strong>Resolution:</strong> Mounted the transceiver onto an active mechanical servo axis on pin 9, implementing a real-time sweeping radar sweep paired with differential wheel-speed mixers.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>📬 Contact & Institutional Affiliation</h2>
+            <hr>
+            <div class="card">
+                <p><strong>University:</strong> University of South Carolina</p>
+                <p><strong>Email:</strong> <a href="mailto:settlesr@email.sc.edu" style="color: var(--link-color); text-decoration: none;">settlesr@email.sc.edu</a></p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Jaira Settles | Computer Engineering Portfolio. Built via Git Integration Standards.</p>
+    </footer>
 
 </body>
 </html>
