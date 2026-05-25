@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jaira Settles | Computer Engineering Portfolio</title>
-    <link rel="stylesheet" href="stylesGP.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -45,8 +45,9 @@
                 <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/myblinks" target="_blank">/myblinks</a></p>
                 <p>A physical, mobile robot dog engineered to scan complex environments and autonomously track moving human targets using real-time spatial sonar feedback vectors.</p>
                 <ul>
-                    <li><strong>Finite State Machine (FSM):</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code>.</li>
+                    <li><strong>RoboDogCode Architecture:</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code>.</li>
                     <li><strong>Asynchronous Processing:</strong> Conquered timing constraints using <code>millis()</code> architectures to handle concurrent sensor reads, wheel adjustments, and sound modulation loops without processor lockups.</li>
+                    <li><strong>Morse Code Signal Module:</strong> Developed a low-level peripheral execution script within the repository that translates alphanumeric string constants to modulate an active buzzer/LED array, translating the name <code>J-A-I-R-A</code> into synchronous Morse Code arrays.</li>
                     <li><strong>Radar Matrix Tracking:</strong> Mounted a sonar array to an active servo axis to feed directional tracking arrays into a custom differential steering mixer.</li>
                 </ul>
             </div>
@@ -148,7 +149,7 @@ else if (ghostX > playerX) nextX++; // &lt;-- The Bug</code></pre>
 
                 <div class="error-block">
                     <h4>Project: Autonomous Robotic Tracking Pet — The "Frozen Brain" Sound Bug</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Running high-latency blocking <code>delay()</code> lines inside computational loops.</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Running high-latency blocking <code>delay()</code> lines inside <code>RoboDogCode</code> core runtime loops.</p>
                     <p><strong>System Failure:</strong> Calling delays stopped the ATmega328P internal clock cycle. During vocalization routines, the robot completely missed distance tracking pulses, causing it to overshoot targets or drop sensor commands.</p>
                     <p><strong>Resolution:</strong> Removed blocking delays and re-architected all time-based intervals around non-blocking timestamp subtractions running on background <code>millis()</code> counters.</p>
                 </div>
