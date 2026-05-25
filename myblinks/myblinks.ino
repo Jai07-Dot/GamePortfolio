@@ -26,7 +26,7 @@ delay(dashTime);
 
 void loop() {
 //J(.---)
-dot(); dash();
+dot(); dash(); dash(); dash();
 delay(letterSpace);
 
 //A(.-)
