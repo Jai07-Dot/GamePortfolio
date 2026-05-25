@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jaira Settles | Computer Engineering Portfolio</title>
-    <link rel="stylesheet" href="stylesGP.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -37,6 +37,7 @@
             <h2>🛠️ Engineering Project Index</h2>
             <hr>
             
+            <!-- Dedicated Robotic Dog Section -->
             <div class="card project-card hardware">
                 <div class="card-header">
                     <h3>Autonomous Robotic Tracking Pet</h3>
@@ -47,11 +48,26 @@
                 <ul>
                     <li><strong>RoboDogCode Architecture:</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code>.</li>
                     <li><strong>Asynchronous Processing:</strong> Conquered timing constraints using <code>millis()</code> architectures to handle concurrent sensor reads, wheel adjustments, and sound modulation loops without processor lockups.</li>
-                    <li><strong>Morse Code Signal Module:</strong> Developed a low-level peripheral execution script within the repository that translates alphanumeric string constants to modulate an active buzzer/LED array, translating the name <code>J-A-I-R-A</code> into synchronous Morse Code arrays.</li>
                     <li><strong>Radar Matrix Tracking:</strong> Mounted a sonar array to an active servo axis to feed directional tracking arrays into a custom differential steering mixer.</li>
                 </ul>
             </div>
 
+            <!-- Dedicated Morse Code Section -->
+            <div class="card project-card hardware">
+                <div class="card-header">
+                    <h3>Synchronous Morse Code Signal Driver</h3>
+                    <span class="badge badge-hardware">Microcontroller Firmware</span>
+                </div>
+                <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/myblinks" target="_blank">/myblinks</a></p>
+                <p>A low-level peripheral firmware module written in C++ to map string constants into variable-duration timing signals for microcontrollers.</p>
+                <ul>
+                    <li><strong>Alphanumeric Parsing Matrix:</strong> Designed an execution logic layer that reads standard character streams and references them against standardized dot-and-dash arrays.</li>
+                    <li><strong>Synchronized Hardware Modulation:</strong> Structured precision loop timers to modulate an active piezoceramic buzzer and onboard LED simultaneously, translating the target string literal <code>J-A-I-R-A</code> into synchronous audio-visual Morse code signals.</li>
+                    <li><strong>Clock-Cycle Precision:</strong> Managed pulse timing states directly using localized iteration thresholds, laying the groundwork for clean, non-blocking asynchronous peripheral events.</li>
+                </ul>
+            </div>
+
+            <!-- Software Suite Section -->
             <div class="card project-card software">
                 <div class="card-header">
                     <h3>Object-Oriented Application Suite</h3>
