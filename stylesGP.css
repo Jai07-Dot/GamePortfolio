@@ -1,14 +1,17 @@
 /* --- Global Theme Registry --- */
 :root {
-    --bg-dark: #09090e;
-    --card-bg: #11111b;
-    --text-main: #e6edf3;
-    --text-muted: #8b9bb4;
-    --hardware-color: #f59e0b;
-    --software-color: #38bdf8;
-    --link-color: #58a6ff;
-    --border-color: #21262d;
-    --code-bg: #161b22;
+    --bg-dark: #fcfaf2;         /* Pure Eggshell White */
+    --card-bg: #fdfdfb;         /* Bright Cream Eggshell for Cards */
+    --text-main: #1e293b;       /* Deep Slate / Charcoal for crisp readability */
+    --text-muted: #475569;      /* Medium Slate for subtitles */
+    --baby-blue: #b9e2f5;       /* Primary Baby Blue Accent */
+    --baby-blue-dark: #38bdf8;  /* Vibrant Blue for subheaders */
+    --pink-outline: #f472b6;    /* Crisp Pink for structural outlines */
+    --hardware-color: #b9e2f5;  /* Hardware utilizes Baby Blue base */
+    --software-color: #f472b6;  /* Software utilizes Pink accent */
+    --link-color: #2563eb;      /* Clear blue for links */
+    --border-color: #f472b6;    /* Pink Outlines for Main Structural Elements */
+    --code-bg: #f1f5f9;         /* Light grey background for code containers */
 }
 
 * {
@@ -33,17 +36,18 @@ body {
 
 /* --- Hero Frame Styles --- */
 .hero {
-    background: linear-gradient(180deg, #161b22 0%, var(--bg-dark) 100%);
-    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(180deg, #e0f2fe 0%, var(--bg-dark) 100%); /* Baby blue fade to eggshell */
+    border-bottom: 2px solid var(--pink-outline); /* Pink outline separation */
     padding: 50px 0;
     text-align: center;
 }
 
 .hero h1 {
-    font-size: 2.25rem;
+    font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     margin-bottom: 8px;
+    color: var(--text-main);
 }
 
 .profile-link {
@@ -69,8 +73,8 @@ body {
 }
 
 .tags span {
-    background-color: rgba(33, 38, 45, 0.7);
-    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    border: 1px solid var(--pink-outline);
     border-radius: 6px;
     color: var(--text-main);
     display: inline-block;
@@ -89,11 +93,12 @@ h2 {
     font-size: 1.6rem;
     font-weight: 600;
     margin-bottom: 12px;
+    color: var(--text-main);
 }
 
 hr {
     border: 0;
-    border-top: 1px solid var(--border-color);
+    border-top: 2px solid var(--pink-outline); /* Crisp pink section dividers */
     margin-bottom: 24px;
 }
 
@@ -105,10 +110,11 @@ hr {
 
 .card {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--pink-outline); /* Clean pink outline box framework */
     border-radius: 8px;
     margin-bottom: 24px;
     padding: 28px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* --- Project Index Cards --- */
@@ -142,7 +148,7 @@ hr {
 }
 
 .sub-project {
-    border-top: 1px solid rgba(33, 38, 45, 0.5);
+    border-top: 1px dashed var(--pink-outline);
     margin-top: 20px;
     padding-top: 20px;
 }
@@ -151,7 +157,7 @@ hr {
     font-size: 1.15rem;
     font-weight: 600;
     margin-bottom: 4px;
-    color: var(--software-color);
+    color: var(--text-main);
 }
 
 .project-card ul {
@@ -167,17 +173,18 @@ hr {
 }
 
 .project-card li::before {
-    content: "∘";
+    content: "•";
     position: absolute;
     left: 0;
     top: -1px;
-    color: var(--text-muted);
+    color: var(--pink-outline);
     font-weight: bold;
     font-size: 1.1rem;
 }
 
-.hardware { border-top: 3px solid var(--hardware-color); }
-.software { border-top: 3px solid var(--software-color); }
+/* Banner accents utilizing our theme combo */
+.hardware { border-left: 6px solid var(--baby-blue-dark); }
+.software { border-left: 6px solid var(--pink-outline); }
 
 .badge {
     border-radius: 2em;
@@ -186,8 +193,8 @@ hr {
     padding: 3px 12px;
     letter-spacing: 0.02em;
 }
-.badge-hardware { background: rgba(245, 158, 11, 0.12); color: var(--hardware-color); border: 1px solid rgba(245, 158, 11, 0.2); }
-.badge-software { background: rgba(56, 189, 248, 0.12); color: var(--software-color); border: 1px solid rgba(56, 189, 248, 0.2); }
+.badge-hardware { background: #e0f2fe; color: #0369a1; border: 1px solid var(--baby-blue-dark); }
+.badge-software { background: #fce7f3; color: #b91c1c; border: 1px solid var(--pink-outline); }
 
 /* --- Post-Mortem Logging Grid --- */
 .section-subtitle {
@@ -195,11 +202,14 @@ hr {
     font-weight: 600;
     margin-bottom: 24px;
     padding-bottom: 8px;
-    border-bottom: 1px dashed var(--border-color);
+    border-bottom: 2px dashed var(--pink-outline);
 }
 
+.text-software { color: #be185d; }
+.text-hardware { color: #0369a1; }
+
 .error-block {
-    border-bottom: 1px solid rgba(33, 38, 45, 0.6);
+    border-bottom: 1px solid #e2e8f0;
     margin-bottom: 24px;
     padding-bottom: 24px;
 }
@@ -218,17 +228,18 @@ hr {
 }
 
 .error-meta {
-    color: #ff7b72;
+    color: #b91c1c; /* Crimson color for alert headers */
     font-size: 0.9rem;
     margin-bottom: 12px;
     font-family: monospace;
+    font-weight: 600;
 }
 
 pre {
     background-color: var(--code-bg);
-    border: 1px solid var(--border-color);
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
-    color: #ff7b72;
+    color: #b91c1c;
     font-family: monospace;
     font-size: 0.85rem;
     margin: 12px 0;
@@ -238,12 +249,12 @@ pre {
 
 code {
     background-color: var(--code-bg);
-    color: #e6edf3;
+    color: #0f172a;
     font-family: monospace;
     padding: 2px 5px;
     border-radius: 4px;
     font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid #cbd5e1;
 }
 
 .error-block p {
@@ -258,8 +269,7 @@ code {
 
 /* --- Summary Panel Core --- */
 .summary-card {
-    background: linear-gradient(180deg, var(--card-bg) 0%, #161b22 100%);
-    border-color: rgba(56, 189, 248, 0.2);
+    background: linear-gradient(180deg, var(--card-bg) 0%, #f0f9ff 100%); /* Subtle blue interior splash */
 }
 .summary-card p {
     margin-bottom: 14px;
@@ -275,7 +285,7 @@ footer {
     text-align: center;
     color: var(--text-muted);
     font-size: 0.8rem;
-    border-top: 1px solid var(--border-color);
+    border-top: 2px solid var(--pink-outline);
     padding-top: 24px;
 }
 
