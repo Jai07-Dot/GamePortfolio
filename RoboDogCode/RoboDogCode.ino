@@ -12,9 +12,15 @@
 #define Trig_PIN        10
 #define BUZZ_PIN        13
 
+// --- SERVO MOTOR HARDWARE PIN ---
+#define SERVO_PIN        5  // Kept on safe, isolated Timer 0 pin
+
 // Verified Hardware Pins
 #define GREEN_PIN       A1  
 #define BLUE_PIN        A3  
+
+// --- HARDWARE INSTANCES ---
+Servo radarServo;
 
 // --- NON-BLOCKING TIMING VARIABLES ---
 unsigned long lastBuzzerAction = 0;
@@ -29,10 +35,23 @@ const unsigned long barkInterval = 2000;
 unsigned long lastWhineTimestamp = 0;
 const unsigned long whineInterval = 2500; 
 
-// --- NEW: SMOOTH TRANSITION TIMING WINDOW VARIABLES ---
+// --- SMOOTH TRANSITION TIMING WINDOW VARIABLES ---
 unsigned long lastTransitionTime = 0;
 const unsigned long transitionWindow = 200; // 200ms safety window between motor changes
 int currentZone = 0; // 0=Rest, 1=Danger, 2=Walk, 3=Run
+
+// --- SERVO RADAR SWEEP VARIABLES ---
+unsigned long lastServoMoveTime = 0;
+const unsigned long servoMoveInterval = 20; // 20ms for much faster, cleaner tracking sweeps
+int currentServoAngle = 90;                 // Start centered
+int sweepDirection = 3;                     // Symmetrical step increment
+const int leftLimit = 45;                   
+const int rightLimit = 135;                 
+
+// --- NEW: ULTRASONIC SENSOR TIMING BUFFER ---
+unsigned long lastPingTime = 0;
+const unsigned long pingInterval = 60;      // Only ping every 60ms to eliminate servo signal starvation
+int lastSavedDistance = 999;
 
 void setup() {
   // Motor control pins
@@ -42,6 +61,10 @@ void setup() {
   
   // Ultrasonic Sensor pins
   pinMode(Trig_PIN, OUTPUT);       pinMode(Echo_PIN, INPUT);
+  
+  // Attach Servo Motor and center it initially
+  radarServo.attach(SERVO_PIN);
+  radarServo.write(currentServoAngle); 
   
   // Force the correct analog pins into digital output mode
   pinMode(GREEN_PIN, OUTPUT);       
@@ -130,15 +153,41 @@ void autoFollow() {
 
 // --- HARDWARE UTILITY FUNCTIONS ---
 
-// Ultrasonic ping calculation
+// Ultrasonic ping calculation + Integrated Servo Sweep
 int watch() {
-  digitalWrite(Trig_PIN, LOW); delayMicroseconds(2);
-  digitalWrite(Trig_PIN, HIGH); delayMicroseconds(10);
-  digitalWrite(Trig_PIN, LOW);
-  
-  long durationResult = pulseIn(Echo_PIN, HIGH, 8000); 
-  if (durationResult == 0) return 999; 
-  return round(durationResult * 0.01657);
+  unsigned long currentMillis = millis();
+
+  // 1. ASYNCHRONOUS RADAR SWEEP STEPPING LAYER
+  if (currentMillis - lastServoMoveTime >= servoMoveInterval) {
+    lastServoMoveTime = currentMillis;
+    
+    currentServoAngle += sweepDirection; // Nudge the angle position
+    
+    // Reverse directions if we hit the scanning boundaries
+    if (currentServoAngle >= rightLimit || currentServoAngle <= leftLimit) {
+      sweepDirection = -sweepDirection; 
+    }
+    
+    radarServo.write(currentServoAngle); // Command the physical movement
+  }
+
+  // 2. BUFFERED ASYNCHRONOUS ULTRASONIC SENSOR PING
+  if (currentMillis - lastPingTime >= pingInterval) {
+    lastPingTime = currentMillis;
+
+    digitalWrite(Trig_PIN, LOW); delayMicroseconds(2);
+    digitalWrite(Trig_PIN, HIGH); delayMicroseconds(10);
+    digitalWrite(Trig_PIN, LOW);
+    
+    long durationResult = pulseIn(Echo_PIN, HIGH, 8000); 
+    if (durationResult == 0) {
+      lastSavedDistance = 999;
+    } else {
+      lastSavedDistance = round(durationResult * 0.01657);
+    }
+  }
+
+  return lastSavedDistance; // Return the cached reading if it isn't time to ping again
 }
 
 // Pure digital switching to pins A1 and A3
