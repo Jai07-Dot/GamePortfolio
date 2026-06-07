@@ -11,16 +11,24 @@
 #define Echo_PIN         2
 #define Trig_PIN        10
 #define BUZZ_PIN        13
+#define SERVO_PIN        9  
 
-// --- SERVO MOTOR HARDWARE PIN ---
-#define SERVO_PIN        5  // Kept on safe, isolated Timer 0 pin
-
-// Verified Hardware Pins
+// Hardware Pins (A5 clears the timer conflict, A1 and A3 are fully working!)
+#define RED_PIN          A5  
 #define GREEN_PIN       A1  
 #define BLUE_PIN        A3  
 
-// --- HARDWARE INSTANCES ---
-Servo radarServo;
+// --- DOG STATE ENGINE ---
+enum DogMood { FOLLOWING, ZOOMIES, CHASING_TAIL, GUARD, STANDBY };
+DogMood currentMood = FOLLOWING;
+
+// --- SERVO RADAR VARIABLES ---
+Servo headServo;
+unsigned long lastServoMove = 0;
+const unsigned long servoInterval = 250; 
+int servoPositions[] = {50, 90, 130, 90}; 
+int servoIndex = 0;
+int lastTargetDirection = 1; 
 
 // --- NON-BLOCKING TIMING VARIABLES ---
 unsigned long lastBuzzerAction = 0;
@@ -28,30 +36,35 @@ unsigned long durationBuzzer = 0;
 bool buzzerIsOn = false;
 unsigned long lastBuzzerToggle = 0;
 bool buzzerPinState = HIGH;
-int whinePitchModifier = 2; 
+int pitchDelayMicros = 2; 
 
 unsigned long lastBarkTimestamp = 0;
-const unsigned long barkInterval = 2000; 
+const unsigned long barkInterval = 10000; 
 unsigned long lastWhineTimestamp = 0;
 const unsigned long whineInterval = 2500; 
 
-// --- SMOOTH TRANSITION TIMING WINDOW VARIABLES ---
+// AI Tracking Timers & Stabilization Windows
 unsigned long lastTransitionTime = 0;
-const unsigned long transitionWindow = 200; // 200ms safety window between motor changes
-int currentZone = 0; // 0=Rest, 1=Danger, 2=Walk, 3=Run
+const unsigned long transitionWindow = 250; 
+int currentZone = 0; 
 
-// --- SERVO RADAR SWEEP VARIABLES ---
-unsigned long lastServoMoveTime = 0;
-const unsigned long servoMoveInterval = 20; // 20ms for much faster, cleaner tracking sweeps
-int currentServoAngle = 90;                 // Start centered
-int sweepDirection = 3;                     // Symmetrical step increment
-const int leftLimit = 45;                   
-const int rightLimit = 135;                 
+unsigned long outOfRangeStart = 0;
+unsigned long greenZoneStart = 0;
+unsigned long lastSniffTime = 0;
+bool sniffToggle = false;
 
-// --- NEW: ULTRASONIC SENSOR TIMING BUFFER ---
-unsigned long lastPingTime = 0;
-const unsigned long pingInterval = 60;      // Only ping every 60ms to eliminate servo signal starvation
-int lastSavedDistance = 999;
+// --- STRATEGY B: SEPARATED INDEPENDENT TIMERS ---
+unsigned long zoomiesTimer = 0;            
+unsigned long guardDogStandoffTimer = 0;   
+unsigned long tailChaseTimer = 0;          
+unsigned long lastGuardCheckMillis = 0;    
+const unsigned long guardCheckInterval = 100; 
+
+// --- ZOOMIES CONTROLS & VISUAL COUNTDOWN ---
+unsigned long zoomiesSubPhaseMillis = 0;
+int zoomiesPhaseStep = 0; 
+unsigned long countdownStartMillis = 0;
+bool isCountingDownToZoomies = false;
 
 void setup() {
   // Motor control pins
@@ -62,199 +75,432 @@ void setup() {
   // Ultrasonic Sensor pins
   pinMode(Trig_PIN, OUTPUT);       pinMode(Echo_PIN, INPUT);
   
-  // Attach Servo Motor and center it initially
-  radarServo.attach(SERVO_PIN);
-  radarServo.write(currentServoAngle); 
-  
-  // Force the correct analog pins into digital output mode
+  // LED Output Setup
+  pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);       
   pinMode(BLUE_PIN, OUTPUT);
   
-  // Active-low buzzer setup (starts off/silent)
+  // Active-low buzzer setup
   pinMode(BUZZ_PIN, OUTPUT);
   digitalWrite(BUZZ_PIN, HIGH); 
   
-  // Debug Serial Monitor
+  // Attach Servo to Pin 9 and initialize facing center (90 degrees)
+  headServo.attach(SERVO_PIN);
+  headServo.write(90);
+  
+  // Seed random generator
+  randomSeed(analogRead(A0));
+  
   Serial.begin(9600);
 }
 
+// =========================================================================
+// --- CENTRAL MASTER ENGINE CONTROLLER ---
+// =========================================================================
 void loop() {
-  // 1. Constantly runs the buzzer frequency generator in the background
-  handleNonBlockingBuzzer(millis());
+  unsigned long currentMillis = millis();
+  
+  // Keep background sound engines cycling smoothly without lockups
+  handleNonBlockingBuzzer(currentMillis);
 
-  // 2. Pure standalone smart pet behaviors
-  autoFollow();
+  // -----------------------------------------------------------------------
+  // PRIORITY LOCKOUT ZONE 1: ZOOMIES SEQUENCE 
+  // -----------------------------------------------------------------------
+  if (isCountingDownToZoomies) {
+    handleZoomieCountdown(currentMillis);
+    return; 
+  }
+  
+  if (currentMood == ZOOMIES) {
+    runIsolatedZoomies(currentMillis);
+    return; 
+  }
+
+  // -----------------------------------------------------------------------
+  // PRIORITY LOCKOUT ZONE 2: GUARD DOG MODE (MAD DOG)
+  // -----------------------------------------------------------------------
+  if (currentMood == GUARD) {
+    runIsolatedGuardDog(currentMillis);
+    return; 
+  }
+
+  // -----------------------------------------------------------------------
+  // STANDARD OPERATION ZONE
+  // -----------------------------------------------------------------------
+  switch(currentMood) {
+    case FOLLOWING:    autoFollow(currentMillis);    break;
+    case CHASING_TAIL: runChasingTail(currentMillis); break;
+    case STANDBY:      runStandbyMode(currentMillis); break;
+    default:           break;
+  }
 }
 
-// --- BEHAVIOR ENGINE (REVERSED FOR BACK RADAR WITH STABILIZATION WINDOW) ---
-void autoFollow() {
+// =========================================================================
+// --- ISOLATED MOOD LOGIC BLOCKS ---
+// =========================================================================
+
+void handleZoomieCountdown(unsigned long currentMillis) {
+  // COUNTDOWN TO ZOOMIES: Pure White (All channels ON)
+  setRGB(HIGH, HIGH, HIGH);  
+  
+  if (currentMillis - countdownStartMillis < 1000) {
+    go_Backward_Smooth(120, 120); 
+  } else {
+    stop_Stop(); 
+  }
+  
+  if (currentMillis - countdownStartMillis >= 2500) { 
+    isCountingDownToZoomies = false; 
+    currentMood = ZOOMIES;
+    zoomiesTimer = currentMillis + 3800; 
+    zoomiesPhaseStep = 1;
+    zoomiesSubPhaseMillis = currentMillis;
+    stop_Stop();
+  }
+}
+
+void runIsolatedZoomies(unsigned long currentMillis) {
+  if (currentMillis > zoomiesTimer) { 
+    stop_Stop(); 
+    setRGB(LOW, LOW, LOW); 
+    currentMood = FOLLOWING; 
+    currentZone = 0; 
+    zoomiesPhaseStep = 0; 
+    return; 
+  }
+  
+  // ZOOMIES ACTIVE: Pure White
+  setRGB(HIGH, HIGH, HIGH);
+  
+  if (zoomiesPhaseStep == 1) {
+    go_Advance_Smooth(80, 220);
+    if (currentMillis - zoomiesSubPhaseMillis >= 1000) {
+      zoomiesSubPhaseMillis = currentMillis;
+      zoomiesPhaseStep = 2;
+    }
+  } 
+  else if (zoomiesPhaseStep == 2) {
+    go_Advance_Smooth(220, 80);
+    if (currentMillis - zoomiesSubPhaseMillis >= 1000) {
+      zoomiesSubPhaseMillis = currentMillis;
+      zoomiesPhaseStep = 3;
+    }
+  } 
+  else if (zoomiesPhaseStep == 3) {
+    spin_In_Place(230, 230, true, false); 
+    if (currentMillis - zoomiesSubPhaseMillis >= 1800) {
+      stop_Stop();
+      setRGB(LOW, LOW, LOW);
+      currentMood = FOLLOWING; 
+      currentZone = 0; 
+      zoomiesPhaseStep = 0;
+    }
+  }
+}
+
+void runIsolatedGuardDog(unsigned long currentMillis) {
+  if (currentMillis - lastGuardCheckMillis >= guardCheckInterval) {
+    lastGuardCheckMillis = currentMillis;
+    
+    int checkDistance = watch();
+    if (checkDistance > 30 && checkDistance != 999) {
+      stop_Stop();
+      setRGB(LOW, LOW, LOW);
+      digitalWrite(BUZZ_PIN, HIGH); 
+      currentMood = FOLLOWING; 
+      currentZone = 0; 
+      return; 
+    }
+  }
+  
+  // MAD DOG STATE: Flashing Pure Red
+  if ((currentMillis / 100) % 2 == 0) {
+    setRGB(HIGH, LOW, LOW);  
+  } else {
+    setRGB(LOW, LOW, LOW);   
+  }
+  
+  if ((currentMillis / 200) % 2 == 0) {
+    go_Advance_Smooth(190, 190); 
+  } else {
+    spin_In_Place(160, 160, false, false); 
+  }
+  
+  if (currentMillis % 10 < 5) {
+    digitalWrite(BUZZ_PIN, LOW);
+  } else {
+    digitalWrite(BUZZ_PIN, HIGH);
+  }
+}
+
+// =========================================================================
+// --- STANDARD SENSOR TRACKING ENGINE ---
+// =========================================================================
+void autoFollow(unsigned long currentMillis) {
+  if (currentMillis - lastServoMove >= servoInterval) {
+    lastServoMove = currentMillis;
+    headServo.write(servoPositions[servoIndex]);
+    
+    if (servoPositions[servoIndex] == 50)       lastTargetDirection = 0; 
+    else if (servoPositions[servoIndex] == 90)  lastTargetDirection = 1; 
+    else if (servoPositions[servoIndex] == 130) lastTargetDirection = 2; 
+    
+    servoIndex = (servoIndex + 1) % 4; 
+  }
+
   int distance = watch();
-  unsigned long currentMillis = millis();
   int targetZone = 0;
 
-  // Map the distance to a target zone ID
-  if (distance <= 20) {
-    targetZone = 1; // Danger / Cyan
-  } else if (distance > 20 && distance <= 45) {
-    targetZone = 2; // Walk / Green
-  } else if (distance > 45 && distance < 100) {
-    targetZone = 3; // Run / Blue
-  } else {
-    targetZone = 0; // Out of Range / Rest
-  }
+  if (distance <= 20)                       targetZone = 1; 
+  else if (distance > 20 && distance <= 45) targetZone = 2; 
+  else if (distance > 45 && distance < 100) targetZone = 3; 
+  else                                      targetZone = 0; 
 
-  // Only allow a zone change if the 200ms stabilization window has passed
   if (targetZone != currentZone) {
     if (currentMillis - lastTransitionTime >= transitionWindow) {
+      
+      if (currentMood == STANDBY && (targetZone == 2 || targetZone == 3)) {
+        if (random(0, 2) == 0) {
+          isCountingDownToZoomies = true;
+          countdownStartMillis = currentMillis;
+          stop_Stop(); 
+          currentZone = targetZone;
+          lastTransitionTime = currentMillis;
+          guardDogStandoffTimer = 0; 
+          return; 
+        }
+      }
+      
       currentZone = targetZone;
-      lastTransitionTime = currentMillis; // Reset the window timer
+      lastTransitionTime = currentMillis;
     }
   }
 
-  // --- EXECUTE STABILIZED ZONE ACTIONS ---
-  switch (currentZone) {
+  // 1. DANGER ZONE -> Solid Red Standoff Mode
+  if (currentZone == 1) { 
+    greenZoneStart = 0;
     
-    case 1: // DANGER ZONE (CYAN): Too close! Stop completely.
-      setRGB(HIGH, HIGH);     // Cyan / Teal
-      stop_Stop();            // Stop moving completely
-      
-      if (currentMillis - lastBarkTimestamp >= barkInterval) {
-        triggerBark(50);      // Quick alert chirp
-        lastBarkTimestamp = currentMillis;
-      }
-      break;
+    setRGB(HIGH, LOW, LOW); // MADDOG-RED
+    stop_Stop();            
+    outOfRangeStart = 0;
 
-    case 2: // CLOSE FOLLOWING ZONE (PURE GREEN): Walk toward it.
-      setRGB(HIGH, LOW);      // Pure Green
-      go_Walk();              // Walk smoothly toward the trigger
-      break;
-
-    case 3: // LONG DISTANCE FOLLOWING ZONE (PURE BLUE): Run to catch up.
-      setRGB(LOW, HIGH);      // Pure Blue
-      go_Run();               // Run swiftly toward the trigger
-      
-      if (currentMillis - lastBarkTimestamp >= barkInterval) {
-        triggerBark(50);      // Eager catching-up chirp
-        lastBarkTimestamp = currentMillis;
-      }
-      break;
-
-    default: // OUT OF RANGE / NO READ (LONELY WHINE)
-      setRGB(LOW, LOW);       // Out of sight: No color / LEDs Off
-      stop_Stop();            // Park safely
-      
-      if (currentMillis - lastWhineTimestamp >= whineInterval) {
-        triggerLonelyWhine(200); // 200ms sad yip/whimper
-        lastWhineTimestamp = currentMillis;
-      }
-      break;
-  }
-}
-
-// --- HARDWARE UTILITY FUNCTIONS ---
-
-// Ultrasonic ping calculation + Integrated Servo Sweep
-int watch() {
-  unsigned long currentMillis = millis();
-
-  // 1. ASYNCHRONOUS RADAR SWEEP STEPPING LAYER
-  if (currentMillis - lastServoMoveTime >= servoMoveInterval) {
-    lastServoMoveTime = currentMillis;
-    
-    currentServoAngle += sweepDirection; // Nudge the angle position
-    
-    // Reverse directions if we hit the scanning boundaries
-    if (currentServoAngle >= rightLimit || currentServoAngle <= leftLimit) {
-      sweepDirection = -sweepDirection; 
+    if (guardDogStandoffTimer == 0) {
+      guardDogStandoffTimer = currentMillis; 
     }
     
-    radarServo.write(currentServoAngle); // Command the physical movement
-  }
-
-  // 2. BUFFERED ASYNCHRONOUS ULTRASONIC SENSOR PING
-  if (currentMillis - lastPingTime >= pingInterval) {
-    lastPingTime = currentMillis;
-
-    digitalWrite(Trig_PIN, LOW); delayMicroseconds(2);
-    digitalWrite(Trig_PIN, HIGH); delayMicroseconds(10);
-    digitalWrite(Trig_PIN, LOW);
+    if (currentMillis - guardDogStandoffTimer > 60000) {
+      currentMood = GUARD; 
+      guardDogStandoffTimer = 0;
+      return;
+    }
     
-    long durationResult = pulseIn(Echo_PIN, HIGH, 8000); 
-    if (durationResult == 0) {
-      lastSavedDistance = 999;
+    if (currentMillis - lastBarkTimestamp >= barkInterval) {
+      triggerLowerBark(50);      
+      lastBarkTimestamp = currentMillis;
+    }
+  } 
+  
+  // 2. CLOSE FOLLOWING ZONE 
+  else if (currentZone == 2) { 
+    guardDogStandoffTimer = 0; 
+    if (greenZoneStart == 0) greenZoneStart = currentMillis;
+    
+    if (currentMillis - greenZoneStart > 8000) {
+      currentMood = CHASING_TAIL;
+      tailChaseTimer = currentMillis + 4000; 
+      greenZoneStart = 0;
+      stop_Stop();
+      return;
+    }
+
+    setRGB(LOW, HIGH, LOW); // CLOSE FOLLOW: GREEN
+    
+    if (lastTargetDirection == 0)      go_Advance_Smooth(80, 150);  
+    else if (lastTargetDirection == 2) go_Advance_Smooth(150, 80);  
+    else                               go_Advance_Smooth(130, 130); 
+    outOfRangeStart = 0;
+  } 
+  
+  // 3. LONG DISTANCE ZONE
+  else if (currentZone == 3) { 
+    guardDogStandoffTimer = 0; 
+    greenZoneStart = 0;
+    outOfRangeStart = 0;
+
+    setRGB(LOW, LOW, HIGH); // DISTANCE FOLLOW: BLUE
+    
+    if (lastTargetDirection == 0)      go_Advance_Smooth(130, 230); 
+    else if (lastTargetDirection == 2) go_Advance_Smooth(230, 130); 
+    else                               go_Advance_Smooth(210, 210); 
+    
+    if (currentMillis - lastBarkTimestamp >= barkInterval) {
+      triggerLowerBark(50);      
+      lastBarkTimestamp = currentMillis;
+    }
+
+    if ((currentMillis % 1000 == 0) && random(0, 100) < 5) {
+      isCountingDownToZoomies = true;
+      countdownStartMillis = currentMillis;
+      stop_Stop();
+    }
+  } 
+  
+  // 4. OUT OF RANGE / GOING LONELY
+  else { 
+    guardDogStandoffTimer = 0; 
+    greenZoneStart = 0;
+    if (outOfRangeStart == 0) outOfRangeStart = currentMillis;
+    
+    if (currentMillis - outOfRangeStart > 5000) {
+      currentMood = STANDBY;
     } else {
-      lastSavedDistance = round(durationResult * 0.01657);
+      setRGB(LOW, LOW, LOW); 
+      stop_Stop();
     }
   }
-
-  return lastSavedDistance; // Return the cached reading if it isn't time to ping again
 }
 
-// Pure digital switching to pins A1 and A3
-void setRGB(int g, int b) {
-  digitalWrite(GREEN_PIN, g);
-  digitalWrite(BLUE_PIN, b);
+void runChasingTail(unsigned long currentMillis) {
+  if (currentMillis > tailChaseTimer) { 
+    currentMood = FOLLOWING; 
+    currentZone = 0; 
+    return; 
+  }
+  setRGB(LOW, HIGH, LOW); // Matches happy Green follow
+  spin_In_Place(220, 220, true, false); 
 }
 
-// Walk Function (Directions swapped: HIGH/LOW flipped to reverse movement)
-void go_Walk() {
+void runStandbyMode(unsigned long currentMillis) {
+  headServo.write(90);
+  int testDistance = watch();
+
+  if (testDistance < 100) {
+    currentMood = FOLLOWING;
+    currentZone = 0;
+    outOfRangeStart = 0;
+    return;
+  }
+
+  setRGB(LOW, HIGH, HIGH); // SAD DOG / SNIFF: CYAN
+
+  if (currentMillis - lastWhineTimestamp >= whineInterval) {
+    triggerHighWhine(100); 
+    lastWhineTimestamp = currentMillis;
+  }
+
+  if (currentMillis - lastSniffTime > 700) {
+    lastSniffTime = currentMillis;
+    sniffToggle = !sniffToggle;
+    
+    if (sniffToggle) {
+      go_Advance_Smooth(100, 0); 
+      digitalWrite(BUZZ_PIN, LOW); delayMicroseconds(80); digitalWrite(BUZZ_PIN, HIGH);
+    } else {
+      go_Advance_Smooth(0, 100); 
+      digitalWrite(BUZZ_PIN, LOW); delayMicroseconds(80); digitalWrite(BUZZ_PIN, HIGH);
+    }
+  }
+}
+
+// =========================================================================
+// --- HARDWARE SUBSYSTEM DRIVERS ---
+// =========================================================================
+
+void go_Advance_Smooth(int leftSpeed, int rightSpeed) {
   digitalWrite(RightDirectPin1, LOW);  digitalWrite(RightDirectPin2, HIGH);
   digitalWrite(LeftDirectPin1, LOW);   digitalWrite(LeftDirectPin2, HIGH);
-  analogWrite(speedPinL, 130);         analogWrite(speedPinR, 130); 
+  analogWrite(speedPinL, leftSpeed);   analogWrite(speedPinR, rightSpeed);
 }
 
-// Run Function (Directions swapped: HIGH/LOW flipped to reverse movement)
-void go_Run() {
-  digitalWrite(RightDirectPin1, LOW);  digitalWrite(RightDirectPin2, HIGH);
-  digitalWrite(LeftDirectPin1, LOW);   digitalWrite(LeftDirectPin2, HIGH);
-  analogWrite(speedPinL, 210);         analogWrite(speedPinR, 210); 
+void go_Backward_Smooth(int leftSpeed, int rightSpeed) {
+  digitalWrite(RightDirectPin1, HIGH); digitalWrite(RightDirectPin2, LOW);
+  digitalWrite(LeftDirectPin1, HIGH);  digitalWrite(LeftDirectPin2, LOW);
+  analogWrite(speedPinL, leftSpeed);   analogWrite(speedPinR, rightSpeed);
 }
 
-// Full Stop
+void spin_In_Place(int leftSpeed, int rightSpeed, bool leftClockwise, bool rightClockwise) {
+  digitalWrite(LeftDirectPin1, leftClockwise ? HIGH : LOW);
+  digitalWrite(LeftDirectPin2, leftClockwise ? LOW : HIGH);
+  digitalWrite(RightDirectPin1, rightClockwise ? HIGH : LOW);
+  digitalWrite(RightDirectPin2, rightClockwise ? LOW : HIGH);
+  analogWrite(speedPinL, leftSpeed);
+  analogWrite(speedPinR, rightSpeed);
+}
+
 void stop_Stop() {
   digitalWrite(RightDirectPin1, LOW); digitalWrite(RightDirectPin2, LOW);
   digitalWrite(LeftDirectPin1, LOW);  digitalWrite(LeftDirectPin2, LOW);
   analogWrite(speedPinL, 0);          analogWrite(speedPinR, 0);
 }
 
-// --- ASYNCHRONOUS BUZZER CONTROLLERS ---
-void triggerBark(unsigned long durationParam) {
+void triggerLowerBark(unsigned long durationParam) {
   if (!buzzerIsOn) {
     buzzerIsOn = true;
-    durationBuzzer = durationParam;
-    whinePitchModifier = 2; 
+    durationBuzzer = durationParam; 
+    pitchDelayMicros = 4;           
     lastBuzzerAction = millis();
   }
 }
 
-void triggerLonelyWhine(unsigned long durationParam) {
+void triggerHighWhine(unsigned long durationParam) {
   if (!buzzerIsOn) {
     buzzerIsOn = true;
-    durationBuzzer = durationParam;
-    whinePitchModifier = 1; 
+    durationBuzzer = durationParam; 
+    pitchDelayMicros = 1;           
     lastBuzzerAction = millis();
   }
 }
 
 void handleNonBlockingBuzzer(unsigned long currentMillis) {
+  if (isCountingDownToZoomies) {
+    int timeElapsed = currentMillis - countdownStartMillis;
+    if ((timeElapsed >= 200 && timeElapsed < 350) || (timeElapsed >= 600 && timeElapsed < 750)) {
+      if (currentMillis - lastBuzzerToggle >= 1) { 
+        lastBuzzerToggle = currentMillis;
+        buzzerPinState = !buzzerPinState;
+        digitalWrite(BUZZ_PIN, buzzerPinState);
+      }
+    } else {
+      digitalWrite(BUZZ_PIN, HIGH); 
+    }
+    return; 
+  }
+
   if (buzzerIsOn) {
     if (currentMillis - lastBuzzerAction >= durationBuzzer) {
       digitalWrite(BUZZ_PIN, HIGH); 
       buzzerIsOn = false;
       lastBuzzerAction = currentMillis; 
     } else {
-      if (durationBuzzer > 100 && (currentMillis % 15 == 0)) {
-         whinePitchModifier++; 
-         if(whinePitchModifier > 12) whinePitchModifier = 12; 
+      if (durationBuzzer == 100 && (currentMillis % 12 == 0)) {
+          pitchDelayMicros++; 
+          if(pitchDelayMicros > 6) pitchDelayMicros = 6; 
       }
-
-      if (currentMillis - lastBuzzerToggle >= whinePitchModifier) { 
+      if (currentMillis - lastBuzzerToggle >= pitchDelayMicros) { 
         lastBuzzerToggle = currentMillis;
         buzzerPinState = !buzzerPinState;
         digitalWrite(BUZZ_PIN, buzzerPinState);
       }
     }
   } else {
-    digitalWrite(BUZZ_PIN, HIGH); 
+    if (currentMood != GUARD) {
+      digitalWrite(BUZZ_PIN, HIGH); 
+    }
   }
+}
+
+int watch() {
+  digitalWrite(Trig_PIN, LOW); delayMicroseconds(2);
+  digitalWrite(Trig_PIN, HIGH); delayMicroseconds(10);
+  digitalWrite(Trig_PIN, LOW);
+  
+  long durationResult = pulseIn(Echo_PIN, HIGH, 8000); 
+  if (durationResult == 0) return 999; 
+  return round(durationResult * 0.01657);
+}
+
+void setRGB(int r, int g, int b) {
+  digitalWrite(RED_PIN, r);
+  digitalWrite(GREEN_PIN, g);
+  digitalWrite(BLUE_PIN, b);
 }
