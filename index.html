@@ -39,6 +39,20 @@
             
             <div class="card project-card hardware">
                 <div class="card-header">
+                    <h3>Interactive Desktop Tamagotchi Pet</h3>
+                    <span class="badge badge-hardware">Embedded C++</span>
+                </div>
+                <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/DesktopPetCode" target="_blank">/DesktopPetCode</a></p>
+                <p>An interactive, state-driven desktop pet module utilizing a multi-peripheral hardware architecture to blend emotional expression processing with live environmental monitoring.</p>
+                <ul>
+                    <li><strong>Custom CGRAM Character Layouts:</strong> Configured high-density 5x8 pixel custom font matrices directly inside the LCD1602 graphic generator memory to render dynamic facial emotional micro-expressions (Mad, Sad, Cute, and Default).</li>
+                    <li><strong>Cross-Peripheral Component Grid:</strong> Coordinated an interconnected framework managing an analog multi-axis joystick, an RGB LED color-mixing array, a thermistor circuit, and an active LiquidCrystal driver seamlessly.</li>
+                    <li><strong>State Machine Logic Mapping:</strong> Engineered a finite state machine that dynamically shifts visual expressions, updates text outputs, and blends RGB duty cycles (generating Pink for cute, Yellow for happy, Red for mad) instantly based on real-time voltage swings on the joystick axes.</li>
+                </ul>
+            </div>
+
+            <div class="card project-card hardware">
+                <div class="card-header">
                     <h3>Autonomous Robotic Tracking Pet</h3>
                     <span class="badge badge-hardware">Embedded C++</span>
                 </div>
@@ -159,6 +173,20 @@ else if (ghostX > playerX) nextX++; // &lt;-- The Bug</code></pre>
 
             <div class="card">
                 <h3 class="section-subtitle text-hardware">  Arduino Embedded Systems Failures</h3>
+
+                <div class="error-block">
+                    <h4>Project: Interactive Desktop Tamagotchi Pet — Multi-Channel Analog Input Bleed</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> High-frequency multiplexer switching resource conflicts on the microcontroller ADC (Analog-to-Digital Converter) rail.</p>
+                    <p><strong>System Failure:</strong> Assigning the joystick control line directly adjacent to the thermistor voltage divider loop caused cross-talk electrical fluctuations. Polling the joystick state distorted the temperature calculation loop data.</p>
+                    <p><strong>Resolution:</strong> Physically remapped data routing to separate peripheral neighborhoods across alternate ADC gates (shifting tracking vectors to Analog A3, A4, and A2) and implemented internal software noise filtering.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Interactive Desktop Tamagotchi Pet — Upstream Serial IDE Communication Port Lockout</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Dynamic buffer synchronization failure causing an asynchronous <code>not in sync: resp=0x00</code> STK500 processor interrupt.</p>
+                    <p><strong>System Failure:</strong> The host laptop system blocked communication downstream, leading to absolute execution termination during data packet handshakes and locking the MCU flash tables.</p>
+                    <p><strong>Resolution:</strong> Enforced a physical hardware bus-reset technique sequence paired with manual bootloader driver speed re-allocation inside the core compiler config layout.</p>
+                </div>
 
                 <div class="error-block">
                     <h4>Project: Autonomous Robotic Tracking Pet — The "Frozen Brain" Sound Bug</h4>
