@@ -1,3 +1,4 @@
+// Jaira Settles
 #include <LiquidCrystal.h>
 
 // 1. Hardware Pin Layout
