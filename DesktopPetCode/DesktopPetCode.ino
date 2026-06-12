@@ -1,4 +1,3 @@
-// Jaira Settles
 #include <LiquidCrystal.h>
 
 // 1. Hardware Pin Layout
@@ -11,6 +10,7 @@ const int joystickX = A3;  // VRx
 const int joystickY = A4;  // VRy
 const int joystickSW = 2;  // SW Button
 const int tempPin = A2;     // Thermistor
+const int lightPin = A1;    // Photocell / Photoresistor
 
 // 2. Custom Font Pixel Matrices
 byte sadMouth[8]  = { B00000, B00000, B01110, B10001, B00000, B00000, B00000, B00000 };
@@ -33,6 +33,7 @@ int feedCounter = 0;
 bool lastButtonState = HIGH;
 bool isolatedAction = false; 
 bool manualOverrideActive = false; 
+bool wasAsleep = false;     // Tracks light-to-dark transition memory
 
 // 4. Non-Blocking System Timers
 unsigned long actionStartTime = 0;
@@ -74,6 +75,7 @@ void loop() {
   int xVal = analogRead(joystickX);
   int yVal = analogRead(joystickY);
   bool currentButtonState = digitalRead(joystickSW);
+  int lightLevel = analogRead(lightPin); // Continuous ambient light scanning
 
   // Thermistor conversion
   int rawTemp = analogRead(tempPin);
@@ -87,8 +89,8 @@ void loop() {
   temperature -= 273.15; 
   float fahrenheit = (temperature * 9.0 / 5.0) + 32.0;
 
-  // Metabolic Decay Engine
-  if (currentTime - lastDecayTime >= decayInterval) {
+  // Metabolic Decay Engine (Only decays if the lights are ON)
+  if (lightLevel >= 200 && (currentTime - lastDecayTime >= decayInterval)) {
     if (loveMeter > 0) loveMeter -= 5;  
     if (foodMeter > 0) foodMeter -= 5;  
     lastDecayTime = currentTime;
@@ -121,7 +123,7 @@ void loop() {
   lastButtonState = currentButtonState;
 
   // Joystick Right = Petting Interruption
-  if (xVal > 800 && !isolatedAction) {
+  if (xVal > 800 && !isolatedAction && lightLevel >= 200) {
     petCounter = (petCounter % 3) + 1;
     loveMeter = min(loveMeter + 15, 100); 
     isolatedAction = true;
@@ -132,7 +134,7 @@ void loop() {
   }
 
   // Joystick Left = Feeding Interruption
-  if (xVal < 200 && !isolatedAction) {
+  if (xVal < 200 && !isolatedAction && lightLevel >= 200) {
     feedCounter = (feedCounter % 3) + 1;
     foodMeter = min(foodMeter + 15, 100); 
     isolatedAction = true;
@@ -169,95 +171,134 @@ void loop() {
 
   lcd.clear();
 
-  // ---------------------------------------------------------
-  // DISPLAY RENDER ENGINE: ROW 1 (EXPRESSIONS & INTERRUPTS)
-  // ---------------------------------------------------------
-  if (isolatedAction && petCounter > 0) {
-    // Petting Mode -> Anime Squint ("^ w ^")
-    digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, HIGH); 
-    lcd.setCursor(2, 0); lcd.print("^"); 
-    lcd.setCursor(4, 0); lcd.print("w"); 
-    lcd.setCursor(6, 0); lcd.print("^");
+  // =========================================================
+  // ENVIRONMENT-BASED LIGHT CHECK (IF/ELSE GATEWAY)
+  // =========================================================
+  if (lightLevel < 200) { 
+    // ---------------------------------------------------------
+    // 🌙 SYSTEM SLEEP STATE (Lights are out!)
+    // ---------------------------------------------------------
+    digitalWrite(redPin, LOW); digitalWrite(greenPin, LOW); digitalWrite(bluePin, LOW); // LED Off
     
-    // MODIFIED: Disappearing letter engine based on click iterations
-    lcd.setCursor(9, 0);
-    if (petCounter == 1) lcd.print("LOVE "); // Full Word
-    if (petCounter == 2) lcd.print("LOV  "); // E vanishes
-    if (petCounter == 3) lcd.print("LO   "); // V and E vanish
-  }
-  else if (isolatedAction && feedCounter > 0) {
-    // FEEDING SCREEN -> > O < Eyes + Animated Chomper (Glows Yellow)
-    digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
-    lcd.setCursor(2, 0); lcd.print(">"); 
-    lcd.setCursor(4, 0); lcd.write(mouthIsOpen ? byte(6) : byte(1)); 
-    lcd.setCursor(6, 0); lcd.print("<"); 
+    // Render: "-0- zzz"
+    lcd.setCursor(4, 0); lcd.print("-");
+    lcd.setCursor(5, 0); lcd.write(byte(0)); // Custom curve acts as a round nose/closed mouth '0'
+    lcd.setCursor(6, 0); lcd.print("-");
+    lcd.setCursor(9, 0); lcd.print("zzz");
     
-    lcd.setCursor(9, 0);
-    if (feedCounter == 1) lcd.print("NOM    ");
-    if (feedCounter == 2) lcd.print("NOM NOM");
-    if (feedCounter == 3) lcd.print("3X NOM ");
-  }
+    lcd.setCursor(0, 1);
+    lcd.print("SLEEPING...     ");
+    
+    wasAsleep = true; // Set transition memory flag
+  } 
   else {
-    if (currentEmotion == 0) {
-      // HAPPY!: "o U o" Profile (Glows Green + Blinks)
-      digitalWrite(redPin, LOW); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
-      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o"); 
-      lcd.setCursor(6, 0); lcd.write(byte(0)); 
-      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o"); 
-      lcd.setCursor(10, 0); lcd.print("HAPPY!");
-    } 
-    else if (currentEmotion == 1) {
-      // MAD!: Downward pointed eyebrows over flat eye segments (Glows Red + Blinks)
-      digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, LOW); 
-      lcd.setCursor(4, 0); lcd.write(isBlinking ? byte(4) : byte(2)); 
-      lcd.setCursor(6, 0); lcd.print("_");                             
-      lcd.setCursor(8, 0); lcd.write(isBlinking ? byte(4) : byte(3)); 
-      lcd.setCursor(11, 0); lcd.print("MAD!");
+    // ---------------------------------------------------------
+    // ☀️ WAKE-UP INTERACTION STATE (Fires once upon turning light on)
+    // ---------------------------------------------------------
+    if (wasAsleep == true) {
+      // Glow white-ish while yawning awake
+      digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, HIGH); 
+      
+      // Render: "o0o"
+      lcd.setCursor(4, 0); lcd.print("o");
+      lcd.setCursor(5, 0); lcd.write(byte(0)); // "0" nose profile
+      lcd.setCursor(6, 0); lcd.print("o");
+      
+      lcd.setCursor(0, 1);
+      lcd.print("AWAKING...      ");
+      
+      delay(1500); // 1.5 Second pause to show transition before going to normal emotion loops
+      wasAsleep = false; // Reset memory flag
+      lcd.clear();
     }
-    else if (currentEmotion == 2) {
-      // SAD!: Small circle eyes + Hanging Text Tear "." (Glows Blue + Blinks)
-      digitalWrite(redPin, LOW); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
-      lcd.setCursor(3, 0); lcd.print(isBlinking ? " " : ".");    
-      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o");    
-      lcd.setCursor(6, 0); lcd.write(byte(1)); 
-      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o");    
-      lcd.setCursor(11, 0); lcd.print("SAD!");
-    }
-    else if (currentEmotion == 3) {
-      // CUTE!: Anime Squint "^ V ^" (Glows Pink + Blinks down to flat bars)
-      digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
-      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "^"); 
-      lcd.setCursor(6, 0); lcd.write(byte(0)); 
-      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "^"); 
-      lcd.setCursor(11, 0); lcd.print("CUTE!");
-    }
-  }
 
-  // ---------------------------------------------------------
-  // DISPLAY RENDER ENGINE: ROW 2 (STATUS SCROLLER)
-  // ---------------------------------------------------------
-  lcd.setCursor(0, 1);
-  if (isolatedAction && petCounter > 0) {
-    lcd.print("PETTING...      ");
-  }
-  else if (isolatedAction && feedCounter > 0) {
-    lcd.print("FEEDING...      ");
-  }
-  else if (yVal < 200) {
-    lcd.print("Love: "); lcd.print(loveMeter); lcd.print("% ");
-    int bars = loveMeter / 20; 
-    for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); } 
-    lcd.print("   ");
-  }
-  else if (yVal > 800) {
-    lcd.print("Food: "); lcd.print(foodMeter); lcd.print("% ");
-    int bars = foodMeter / 20;
-    for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); }
-    lcd.print("   ");
-  }
-  else {
-    lcd.print("Temp: "); lcd.print(fahrenheit, 1); lcd.print(" F     ");
-  }
+    // ---------------------------------------------------------
+    // 🐾 NORMAL WAKE STATES (Standard Interaction & Expressions)
+    // ---------------------------------------------------------
+    
+    // ROW 1 RENDERS
+    if (isolatedAction && petCounter > 0) {
+      digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, HIGH); 
+      lcd.setCursor(2, 0); lcd.print("^"); 
+      lcd.setCursor(4, 0); lcd.print("w"); 
+      lcd.setCursor(6, 0); lcd.print("^");
+      
+      lcd.setCursor(9, 0);
+      if (petCounter == 1) lcd.print("LOVE "); 
+      if (petCounter == 2) lcd.print("LOV  "); 
+      if (petCounter == 3) lcd.print("LO   "); 
+    }
+    else if (isolatedAction && feedCounter > 0) {
+      digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
+      lcd.setCursor(2, 0); lcd.print(">"); 
+      lcd.setCursor(4, 0); lcd.write(mouthIsOpen ? byte(6) : byte(1)); 
+      lcd.setCursor(6, 0); lcd.print("<"); 
+      
+      lcd.setCursor(9, 0);
+      if (feedCounter == 1) lcd.print("NOM    ");
+      if (feedCounter == 2) lcd.print("NOM NOM");
+      if (feedCounter == 3) lcd.print("3X NOM ");
+    }
+    else {
+      if (currentEmotion == 0) {
+        // HAPPY!
+        digitalWrite(redPin, LOW); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
+        lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o"); 
+        lcd.setCursor(6, 0); lcd.write(byte(0)); 
+        lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o"); 
+        lcd.setCursor(10, 0); lcd.print("HAPPY!");
+      } 
+      else if (currentEmotion == 1) {
+        // MAD!
+        digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, LOW); 
+        lcd.setCursor(4, 0); lcd.write(isBlinking ? byte(4) : byte(2)); 
+        lcd.setCursor(6, 0); lcd.print("_");                             
+        lcd.setCursor(8, 0); lcd.write(isBlinking ? byte(4) : byte(3)); 
+        lcd.setCursor(11, 0); lcd.print("MAD!");
+      }
+      else if (currentEmotion == 2) {
+        // SAD!
+        digitalWrite(redPin, LOW); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
+        lcd.setCursor(3, 0); lcd.print(isBlinking ? " " : ".");    
+        lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o");    
+        lcd.setCursor(6, 0); lcd.write(byte(1)); 
+        lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o");    
+        lcd.setCursor(11, 0); lcd.print("SAD!");
+      }
+      else if (currentEmotion == 3) {
+        // CUTE!
+        digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
+        lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "^"); 
+        lcd.setCursor(6, 0); lcd.write(byte(0)); 
+        lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "^"); 
+        lcd.setCursor(11, 0); lcd.print("CUTE!");
+      }
+    }
+
+    // ROW 2 RENDERS
+    lcd.setCursor(0, 1);
+    if (isolatedAction && petCounter > 0) {
+      lcd.print("PETTING...      ");
+    }
+    else if (isolatedAction && feedCounter > 0) {
+      lcd.print("FEEDING...      ");
+    }
+    else if (yVal < 200) {
+      lcd.print("Love: "); lcd.print(loveMeter); lcd.print("% ");
+      int bars = loveMeter / 20; 
+      for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); } 
+      lcd.print("   ");
+    }
+    else if (yVal > 800) {
+      lcd.print("Food: "); lcd.print(foodMeter); lcd.print("% ");
+      int bars = foodMeter / 20;
+      for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); }
+      lcd.print("   ");
+    }
+    else {
+      lcd.print("Temp: "); lcd.print(fahrenheit, 1); lcd.print(" F     ");
+    }
+  } // End of wake mode code block
 
   delay(50);
 }
