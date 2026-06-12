@@ -1,27 +1,53 @@
-Jaira Settles 
 #include <LiquidCrystal.h>
 
-// 1. LCD Screen Neighborhood (RS=7, E=8, D4=9, D5=10, D6=11, D7=12)
+// 1. Hardware Pin Layout
 LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
-
-// 2. RGB LED Neighborhood Pins
 const int redPin = 6;
 const int greenPin = 5;
 const int bluePin = 3;
 
-// 3. YOUR NEW PIN ASSIGNMENTS 
-const int joystickX = A3;  // VRx moved here!
-const int joystickY = A4;  // VRy connected here
-const int joystickSW = 2;  // SW Button connected here
-const int tempPin = A2;     // Thermistor stays safe on A2
+const int joystickX = A3;  // VRx
+const int joystickY = A4;  // VRy
+const int joystickSW = 2;  // SW Button
+const int tempPin = A2;     // Thermistor
 
-// Custom Pixel Art Matrices
-byte normalEye[8] = { B00000, B00000, B01100, B01100, B00000, B00000, B00000, B00000 };
-byte madEye[8]    = { B11100, B01100, B00110, B00110, B00000, B00000, B00000, B00000 };
-byte cuteEye[8]   = { B00000, B00100, B01010, B10001, B00000, B00000, B00000, B00000 };
-byte flatMouth[8] = { B00000, B00000, B00000, B00000, B11111, B00000, B00000, B00000 };
+// 2. Custom Font Pixel Matrices
 byte sadMouth[8]  = { B00000, B00000, B01110, B10001, B00000, B00000, B00000, B00000 };
-byte cuteMouth[8] = { B00000, B00000, B00000, B10001, B01010, B00100, B00000, B00000 };
+byte uMouth[8]    = { B00000, B00000, B00000, B10001, B10001, B01010, B00100, B00000 }; // Shared "U" or "V" curve
+byte openMouth[8] = { B00000, B01110, B11111, B11111, B11111, B01110, B00000, B00000 }; // Feeding open chomp
+byte blinkEye[8]  = { B00000, B00000, B00000, B00000, B11111, B00000, B00000, B00000 }; // Standard closed blink line
+
+// Precision Angry Eyebrow + Eye combos (Downward Slanted)
+byte madLeft[8]   = { B11000, B01100, B00110, B00000, B11111, B00000, B00000, B00000 }; // Slants downwards left-to-right \ over eye
+byte madRight[8]  = { B00011, B00110, B01100, B00000, B11111, B00000, B00000, B00000 }; // Slants downwards right-to-left / over eye
+
+// 3. Survival Game Variables
+int loveMeter = 50;         
+int foodMeter = 50;         
+int currentEmotion = 0;     // 0 = HAPPY, 1 = MAD, 2 = SAD, 3 = CUTE
+
+int petCounter = 0;         
+int feedCounter = 0;        
+
+bool lastButtonState = HIGH;
+bool isolatedAction = false; 
+bool manualOverrideActive = false; 
+
+// 4. Non-Blocking System Timers
+unsigned long actionStartTime = 0;
+const unsigned long actionTimeout = 1500; 
+
+unsigned long lastBlinkTime = 0;
+const unsigned long blinkInterval = 4000;
+const unsigned long blinkDuration = 150;
+
+unsigned long lastDecayTime = 0;
+const unsigned long decayInterval = 12000; 
+
+// Animation Subroutines
+unsigned long lastChompTime = 0;
+const unsigned long chompInterval = 200; 
+bool mouthIsOpen = false;
 
 void setup() {
   lcd.begin(16, 2);
@@ -29,20 +55,26 @@ void setup() {
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
+  pinMode(joystickSW, INPUT_PULLUP);
 
-  // INPUT_PULLUP turns on an internal resistor for the SW button so it reads cleanly!
-  pinMode(joystickSW, INPUT_PULLUP); 
-
-  lcd.createChar(0, normalEye);
-  lcd.createChar(1, madEye);
-  lcd.createChar(2, cuteEye);
-  lcd.createChar(3, flatMouth);
-  lcd.createChar(4, sadMouth);
-  lcd.createChar(5, cuteMouth);
+  // Character Register Mapping
+  lcd.createChar(0, uMouth);      // Slot 0: Shared U/V Curve
+  lcd.createChar(1, sadMouth);    // Slot 1: Sad Mouth Curve
+  lcd.createChar(2, madLeft);     // Slot 2: Custom Downward Angry Eye (Left)
+  lcd.createChar(3, madRight);    // Slot 3: Custom Downward Angry Eye (Right)
+  lcd.createChar(4, blinkEye);    // Slot 4: Shared Async Blink Asset
+  lcd.createChar(6, openMouth);   // Slot 6: Feeding Chomper
 }
 
 void loop() {
-  // Read Thermistor
+  unsigned long currentTime = millis();
+
+  // Sensor Gateways
+  int xVal = analogRead(joystickX);
+  int yVal = analogRead(joystickY);
+  bool currentButtonState = digitalRead(joystickSW);
+
+  // Thermistor conversion
   int rawTemp = analogRead(tempPin);
   float resistance = (1023.0 / (float)rawTemp) - 1.0;
   resistance = 10000.0 / resistance; 
@@ -54,39 +86,177 @@ void loop() {
   temperature -= 273.15; 
   float fahrenheit = (temperature * 9.0 / 5.0) + 32.0;
 
-  // Read Joystick Pins
-  int xVal = analogRead(joystickX);
-  int buttonState = digitalRead(joystickSW); // Reads LOW when pressed down
+  // Metabolic Decay Engine
+  if (currentTime - lastDecayTime >= decayInterval) {
+    if (loveMeter > 0) loveMeter -= 5;  
+    if (foodMeter > 0) foodMeter -= 5;  
+    lastDecayTime = currentTime;
+  }
+
+  // Blinking Logic Engine
+  bool isBlinking = false;
+  if (currentTime - lastBlinkTime >= blinkInterval) {
+    isBlinking = true;
+    if (currentTime - lastBlinkTime >= (blinkInterval + blinkDuration)) {
+      lastBlinkTime = currentTime;
+    }
+  }
+
+  // Chomp Toggle Clock
+  if (isolatedAction && feedCounter > 0) {
+    if (currentTime - lastChompTime >= chompInterval) {
+      mouthIsOpen = !mouthIsOpen;
+      lastChompTime = currentTime;
+    }
+  }
+
+  // Joystick Button Click Cycle
+  if (currentButtonState == LOW && lastButtonState == HIGH) {
+    currentEmotion = (currentEmotion + 1) % 4;
+    manualOverrideActive = true; 
+    isolatedAction = false; 
+    delay(50); 
+  }
+  lastButtonState = currentButtonState;
+
+  // Joystick Right = Petting Interruption
+  if (xVal > 800 && !isolatedAction) {
+    petCounter = (petCounter % 3) + 1;
+    loveMeter = min(loveMeter + 15, 100); 
+    isolatedAction = true;
+    manualOverrideActive = false; 
+    feedCounter = 0; 
+    actionStartTime = currentTime;
+    delay(200); 
+  }
+
+  // Joystick Left = Feeding Interruption
+  if (xVal < 200 && !isolatedAction) {
+    feedCounter = (feedCounter % 3) + 1;
+    foodMeter = min(foodMeter + 15, 100); 
+    isolatedAction = true;
+    manualOverrideActive = false;
+    petCounter = 0; 
+    actionStartTime = currentTime;
+    lastChompTime = currentTime;
+    mouthIsOpen = true; 
+    delay(200);
+  }
+
+  // Timeout release gating
+  if (isolatedAction && (currentTime - actionStartTime > actionTimeout)) {
+    isolatedAction = false;
+    petCounter = 0;
+    feedCounter = 0;
+  }
+
+  // Automated State Evaluator
+  if (!manualOverrideActive) {
+    if (foodMeter <= 25) {
+      currentEmotion = 1; 
+    } 
+    else if (loveMeter <= 25) {
+      currentEmotion = 2; 
+    } 
+    else if (loveMeter >= 75 && foodMeter >= 75) {
+      currentEmotion = 3; 
+    } 
+    else {
+      currentEmotion = 0; 
+    }
+  }
 
   lcd.clear();
 
-  // State Machine logic using the new A3 readings
-  if (xVal < 200) {
-    digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, LOW);
-    lcd.setCursor(4, 0); lcd.write(byte(1)); lcd.setCursor(6, 0); lcd.write(byte(3)); lcd.setCursor(8, 0); lcd.write(byte(1));
-    lcd.setCursor(11, 0); lcd.print("MAD!");
-  } 
-  else if (xVal >= 200 && xVal < 450) {
-    digitalWrite(redPin, LOW); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH);
-    lcd.setCursor(4, 0); lcd.write(byte(0)); lcd.setCursor(6, 0); lcd.write(byte(4)); lcd.setCursor(8, 0); lcd.write(byte(0));
-    lcd.setCursor(11, 0); lcd.print("SAD ");
+  // ---------------------------------------------------------
+  // DISPLAY RENDER ENGINE: ROW 1 (EXPRESSIONS & INTERRUPTS)
+  // ---------------------------------------------------------
+  if (isolatedAction && petCounter > 0) {
+    // Petting Mode -> Anime Squint ("^ w ^")
+    digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, HIGH); 
+    lcd.setCursor(2, 0); lcd.print("^"); 
+    lcd.setCursor(4, 0); lcd.print("w"); 
+    lcd.setCursor(6, 0); lcd.print("^");
+    
+    // MODIFIED: Disappearing letter engine based on click iterations
+    lcd.setCursor(9, 0);
+    if (petCounter == 1) lcd.print("LOVE "); // Full Word
+    if (petCounter == 2) lcd.print("LOV  "); // E vanishes
+    if (petCounter == 3) lcd.print("LO   "); // V and E vanish
   }
-  else if (xVal > 800) {
-    digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH);
-    lcd.setCursor(4, 0); lcd.write(byte(2)); lcd.setCursor(6, 0); lcd.write(byte(5)); lcd.setCursor(8, 0); lcd.write(byte(2));
-    lcd.setCursor(11, 0); lcd.print("CUTE");
-  } 
+  else if (isolatedAction && feedCounter > 0) {
+    // FEEDING SCREEN -> > O < Eyes + Animated Chomper (Glows Yellow)
+    digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
+    lcd.setCursor(2, 0); lcd.print(">"); 
+    lcd.setCursor(4, 0); lcd.write(mouthIsOpen ? byte(6) : byte(1)); 
+    lcd.setCursor(6, 0); lcd.print("<"); 
+    
+    lcd.setCursor(9, 0);
+    if (feedCounter == 1) lcd.print("NOM    ");
+    if (feedCounter == 2) lcd.print("NOM NOM");
+    if (feedCounter == 3) lcd.print("3X NOM ");
+  }
   else {
-    digitalWrite(redPin, HIGH); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW);
-    lcd.setCursor(4, 0); lcd.write(byte(0)); lcd.setCursor(6, 0); lcd.write(byte(3)); lcd.setCursor(8, 0); lcd.write(byte(0));
-    lcd.setCursor(11, 0); lcd.print("GOOD");
+    if (currentEmotion == 0) {
+      // HAPPY!: "o U o" Profile (Glows Green + Blinks)
+      digitalWrite(redPin, LOW); digitalWrite(greenPin, HIGH); digitalWrite(bluePin, LOW); 
+      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o"); 
+      lcd.setCursor(6, 0); lcd.write(byte(0)); 
+      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o"); 
+      lcd.setCursor(10, 0); lcd.print("HAPPY!");
+    } 
+    else if (currentEmotion == 1) {
+      // MAD!: Downward pointed eyebrows over flat eye segments (Glows Red + Blinks)
+      digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, LOW); 
+      lcd.setCursor(4, 0); lcd.write(isBlinking ? byte(4) : byte(2)); 
+      lcd.setCursor(6, 0); lcd.print("_");                             
+      lcd.setCursor(8, 0); lcd.write(isBlinking ? byte(4) : byte(3)); 
+      lcd.setCursor(11, 0); lcd.print("MAD!");
+    }
+    else if (currentEmotion == 2) {
+      // SAD!: Small circle eyes + Hanging Text Tear "." (Glows Blue + Blinks)
+      digitalWrite(redPin, LOW); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
+      lcd.setCursor(3, 0); lcd.print(isBlinking ? " " : ".");    
+      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "o");    
+      lcd.setCursor(6, 0); lcd.write(byte(1)); 
+      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "o");    
+      lcd.setCursor(11, 0); lcd.print("SAD!");
+    }
+    else if (currentEmotion == 3) {
+      // CUTE!: Anime Squint "^ V ^" (Glows Pink + Blinks down to flat bars)
+      digitalWrite(redPin, HIGH); digitalWrite(greenPin, LOW); digitalWrite(bluePin, HIGH); 
+      lcd.setCursor(4, 0); lcd.print(isBlinking ? "–" : "^"); 
+      lcd.setCursor(6, 0); lcd.write(byte(0)); 
+      lcd.setCursor(8, 0); lcd.print(isBlinking ? "–" : "^"); 
+      lcd.setCursor(11, 0); lcd.print("CUTE!");
+    }
   }
 
-  // Print temperature on line 2
+  // ---------------------------------------------------------
+  // DISPLAY RENDER ENGINE: ROW 2 (STATUS SCROLLER)
+  // ---------------------------------------------------------
   lcd.setCursor(0, 1);
-  lcd.print("Temp: ");
-  lcd.print(fahrenheit, 1);
-  lcd.print(" F");
+  if (isolatedAction && petCounter > 0) {
+    lcd.print("PETTING...      ");
+  }
+  else if (isolatedAction && feedCounter > 0) {
+    lcd.print("FEEDING...      ");
+  }
+  else if (yVal < 200) {
+    lcd.print("Love: "); lcd.print(loveMeter); lcd.print("% ");
+    int bars = loveMeter / 20; 
+    for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); } 
+    lcd.print("   ");
+  }
+  else if (yVal > 800) {
+    lcd.print("Food: "); lcd.print(foodMeter); lcd.print("% ");
+    int bars = foodMeter / 20;
+    for(int i=0; i<5; i++) { if(i < bars) lcd.print((char)255); else lcd.print("."); }
+    lcd.print("   ");
+  }
+  else {
+    lcd.print("Temp: "); lcd.print(fahrenheit, 1); lcd.print(" F     ");
+  }
 
-  delay(150);
+  delay(50);
 }
