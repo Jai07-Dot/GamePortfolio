@@ -45,9 +45,9 @@
                 <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/DesktopPetCode" target="_blank">/DesktopPetCode</a></p>
                 <p>An interactive, state-driven desktop pet module utilizing a multi-peripheral hardware architecture to blend emotional expression processing with live environmental monitoring.</p>
                 <ul>
-                    <li><strong>Custom CGRAM Character Layouts:</strong> Configured high-density 5x8 pixel custom font matrices directly inside the LCD1602 graphic generator memory to render dynamic facial emotional micro-expressions (Mad, Sad, Cute, and Default).</li>
-                    <li><strong>Cross-Peripheral Component Grid:</strong> Coordinated an interconnected framework managing an analog multi-axis joystick, an RGB LED color-mixing array, a thermistor circuit, and an active LiquidCrystal driver seamlessly.</li>
-                    <li><strong>State Machine Logic Mapping:</strong> Engineered a finite state machine that dynamically shifts visual expressions, updates text outputs, and blends RGB duty cycles (generating Pink for cute, Yellow for happy, Red for mad) instantly based on real-time voltage swings on the joystick axes.</li>
+                    <li><strong>Custom Screen Animations (Low-Level Memory Mapping):</strong> Mapped out custom 5x8 pixel matrices directly inside the LCD display's internal memory registers to design and render dynamic facial expressions (Mad, Sad, Cute, and Default).</li>
+                    <li><strong>Hardware Coordination Layout:</strong> Coordinated an interconnected framework managing an analog multi-axis joystick, an RGB LED color-mixing array, a thermistor circuit, and an active LiquidCrystal driver smoothly on a single micro-grid without lag.</li>
+                    <li><strong>Emotional State Mapping (The Control Loop):</strong> Engineered a Finite State Machine (FSM) that processes real-time voltage variations from the joystick to instantly shift the pet's facial expressions, update text readouts, and dynamically mix RGB indicators to reflect its mood (Green for happy, Yellow for feeding, Pink for petting, and Red for mad).</li>
                 </ul>
             </div>
 
@@ -59,9 +59,9 @@
                 <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/RoboDogCode" target="_blank">/RoboDogCode</a></p>
                 <p>A physical, mobile robot dog engineered to scan complex environments and autonomously track moving human targets using real-time spatial sonar feedback vectors.</p>
                 <ul>
-                    <li><strong>RoboDogCode Architecture:</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code>.</li>
-                    <li><strong>Asynchronous Processing:</strong> Conquered timing constraints using <code>millis()</code> architectures to handle concurrent sensor reads, wheel adjustments, and sound modulation loops without processor lockups.</li>
-                    <li><strong>Radar Matrix Tracking:</strong> Mounted a sonar array to an active servo axis to feed directional tracking arrays into a custom differential steering mixer.</li>
+                    <li><strong>Finite State Machine Loop:</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code> based on incoming feedback.</li>
+                    <li><strong>Asynchronous Processing:</strong> Stripped out blocking delay lines and re-architected all timing components around background <code>millis()</code> counters to handle concurrent sensor reads, wheel adjustments, and sound loops simultaneously without lockups.</li>
+                    <li><strong>Real-World Sensor Testing:</strong> Mounted a sonar array to an active mechanical servo axis to feed directional tracking data into a custom differential steering mixer, ensuring real-time environmental processing.</li>
                 </ul>
             </div>
 
@@ -88,7 +88,7 @@
                 <div class="sub-project">
                     <h4>The Haunted Waltz 5.0</h4>
                     <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/HauntedMaze" target="_blank">/HauntedMaze</a></p>
-                    <p>A hybrid 2D graphical game combining a real-time vector rendering engine with a branching narrative choice matrix spanning 10 alternative endings. Features an automated scaling latency engine that tracks player fear input variables.</p>
+                    <p>A hybrid 2D game engine combining a real-time graphic renderer with an interactive asynchronous user response system and a complex branching narrative featuring 10 alternative endings.</p>
                 </div>
 
                 <div class="sub-project">
@@ -127,11 +127,11 @@
                 
                 <div class="error-block">
                     <h4>Project: The Haunted Waltz 5.0 — The "Forever Right" Tracking Glitch</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Duplicate logic incrementation within the vector calculus pipeline.</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Duplicate logic incrementation within the movement evaluation pipeline.</p>
                     <pre><code>if (ghostX < playerX) nextX++;
 else if (ghostX > playerX) nextX++; // &lt;-- The Bug</code></pre>
-                    <p><strong>System Failure:</strong> Instead of decrementing when the target was to its left, the asset incremented regardless, causing it to flee from the player and run into a permanent boundary lock.</p>
-                    <p><strong>Resolution:</strong> Refactored the second operational branch to cleanly handle symmetrical decrement calculations: <code>nextX--</code>.</p>
+                    <p><strong>System Failure:</strong> Instead of calculating the enemy position relative to the player, the asset incremented its coordinate regardless, causing it to flee from the user and run into a permanent boundary lock.</p>
+                    <p><strong>Resolution:</strong> Refactored the operational branch to cleanly handle symmetrical decrement calculations: <code>nextX--</code>.</p>
                 </div>
 
                 <div class="error-block">
@@ -165,21 +165,20 @@ else if (ghostX > playerX) nextX++; // &lt;-- The Bug</code></pre>
 
                 <div class="error-block">
                     <h4>Project: The Haunted Waltz 5.0 — Synchronous Thread Freezing</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Porting blocking console IO structures into asynchronous graphic event pipelines.</p>
-                    <p><strong>System Failure:</strong> Calling <code>sc.nextLine()</code> halted execution of the graphics thread while waiting for manual text entry, starving display refresh registers and locking the window system UI layer.</p>
-                    <p><strong>Resolution:</strong> Completely dropped Scanner logic dependencies and migrated choices into asynchronous modal <code>JOptionPane.showOptionDialog</code> modules.</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Porting blocking console IO structures into an asynchronous graphic event pipeline.</p>
+                    <p><strong>System Failure:</strong> Calling <code>sc.nextLine()</code> inside an active game loop forced the main graphics thread to completely halt execution while waiting for manual keyboard input, locking up the window system UI layer.</p>
+                    <p><strong>Resolution:</strong> Completely dropped Scanner logic dependencies and migrated choice selection modules into non-blocking asynchronous modal <code>JOptionPane</code> dialog elements to keep the graphics rendering active.</p>
                 </div>
             </div>
 
             <div class="card">
                 <h3 class="section-subtitle text-hardware">  Arduino Embedded Systems Failures</h3>
 
-
                 <div class="error-block">
                     <h4>Project: Autonomous Robotic Tracking Pet — The "Frozen Brain" Sound Bug</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Running high-latency blocking <code>delay()</code> lines inside <code>RoboDogCode</code> core runtime loops.</p>
-                    <p><strong>System Failure:</strong> Calling delays stopped the ATmega328P internal clock cycle. During vocalization routines, the robot completely missed distance tracking pulses, causing it to overshoot targets or drop sensor commands.</p>
-                    <p><strong>Resolution:</strong> Removed blocking delays and re-architected all time-based intervals around non-blocking timestamp subtractions running on background <code>millis()</code> counters.</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Running high-latency blocking <code>delay()</code> lines inside core runtime routines.</p>
+                    <p><strong>System Failure:</strong> Using standard delays completely halted the internal clock cycle. While the processor was waiting out a delay to finish a vocalization routine, it became blind to incoming distance tracking pulses, causing it to overshoot physical targets.</p>
+                    <p><strong>Resolution:</strong> Stripped out blocking delays and re-architected all time-based intervals around non-blocking timestamp checks running on background <code>millis()</code> counters.</p>
                 </div>
 
                 <div class="error-block">
