@@ -48,7 +48,7 @@
                     <li><strong>Custom Screen Animations (Low-Level Memory Mapping):</strong> Mapped out custom 5x8 pixel matrices directly inside the LCD display's internal memory registers to design and render dynamic facial expressions (Mad, Sad, Cute, and Default).</li>
                     <li><strong>Hardware Coordination Layout:</strong> Coordinated an interconnected framework managing an analog multi-axis joystick, an RGB LED color-mixing array, a thermistor circuit, and an active LiquidCrystal driver smoothly on a single micro-grid without lag.</li>
                     <li><strong>Emotional State Mapping (The Control Loop):</strong> Engineered a Finite State Machine (FSM) that processes real-time voltage variations from the joystick to instantly shift the pet's facial expressions, update text readouts, and dynamically mix RGB indicators to reflect its mood (Green for happy, Yellow for feeding, Pink for petting, Red for mad and Blue for Sad).</li>
-                 <li><strong> Video to watch: https://docs.google.com/videos/d/11xSY6Ht7oXHotJfiLVtX-_A-E1oz7BdwMbiLKiY1hpk/edit?usp=sharing</li>
+                    <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/11xSY6Ht7oXHotJfiLVtX-_A-E1oz7BdwMbiLKiY1hpk/edit?usp=sharing" target="_blank">Watch Project Functionality Video</a></li>
                 </ul>
             </div>
 
@@ -58,12 +58,12 @@
                     <span class="badge badge-hardware">Embedded C++</span>
                 </div>
                 <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/RoboDogCode" target="_blank">/RoboDogCode</a></p>
-                <p>A physical, mobile robot dog engineered to scan complex environments and autonomously track moving human targets using real-time spatial sonar feedback vectors.</p>
+                <p>A physical, mobile robot dog engineered to scan local spaces and autonomously alter its movement vectors using asynchronous color-indexed sonar feedback arrays.</p>
                 <ul>
-                    <li><strong>Finite State Machine Loop:</strong> Programmed a 5-state behavioral loop tracking transitions between <code>Following</code>, <code>Random Zoomies</code>, <code>Guard Dog</code>, <code>Standby Sniffing</code>, and <code>Tail-Chasing</code> based on incoming feedback.</li>
-                    <li><strong>Asynchronous Processing:</strong> Stripped out blocking delay lines and re-architected all timing components around background <code>millis()</code> counters to handle concurrent sensor reads, wheel adjustments, and sound loops simultaneously without lockups.</li>
-                    <li><strong>Real-World Sensor Testing:</strong> Mounted a sonar array to an active mechanical servo axis to feed directional tracking data into a custom differential steering mixer, ensuring real-time environmental processing.</li>
-               <li><strong> Video to watch: https://docs.google.com/videos/d/1fHdG6lpyReaUm-dYWpCToYgjupsRmukTXE9pSM2uwHQ/edit?usp=sharing</li>
+                    <li><strong>Color-Coded Distance Tracking:</strong> Programmed a real-time target proximity indicator mapping hardware sensor feedback streams directly to an RGB layout: Red for immediate stops (very close), Green for pace maintenance (ideal following distance), and Blue for speed acceleration (very far distance bounds).</li>
+                    <li><strong>Behavioral Mood Sequences:</strong> Implemented specialized behavioral operational modes including a Cyan-indicated <code>Whine Mode</code> that activates active scanning sweeps when target signals are lost, a White-indicated <code>Zoomies Mode</code> reflecting a successful path state, and an aggressive Red-pulsed <code>Mad Dog Mode</code> triggered by sustained proximity locks.</li>
+                    <li><strong>Asynchronous Core Timing:</strong> Re-architected runtime processes to use non-blocking background <code>millis()</code> counters, freeing up processing capacity to control dual H-bridge motor drivers, sonar array transitions, and LED frequency steps simultaneously.</li>
+                    <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/1fHdG6lpyReaUm-dYWpCToYgjupsRmukTXE9pSM2uwHQ/edit?usp=sharing" target="_blank">Watch Project Functionality Video</a></li>
                 </ul>
             </div>
 
@@ -91,6 +91,11 @@
                     <h4>The Haunted Waltz 5.0</h4>
                     <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/HauntedMaze" target="_blank">/HauntedMaze</a></p>
                     <p>A hybrid 2D game engine combining a real-time graphic renderer with an interactive asynchronous user response system and a complex branching narrative featuring 10 alternative endings.</p>
+                    <ul>
+                        <li><strong>Asynchronous Modal Option Arrays:</strong> Integrated localized <code>JOptionPane</code> engines to deliver real-time environmental choices (e.g., encountering "The Dancing Lady") directly over the vector window thread without freezing game state parameters.</li>
+                        <li><strong>Dynamic Bravery Parsing:</strong> Developed input sanitization channels processing user scale values from 1-10 inside interactive pop-ups to calculate real-time sanity tracking deductions or branching text changes.</li>
+                        <li><strong>Branching Structural Endings:</strong> Wired character asset vector collisions to map pathways down a narrative tree containing 10 distinct terminal game profiles.</li>
+                    </ul>
                 </div>
 
                 <div class="sub-project">
