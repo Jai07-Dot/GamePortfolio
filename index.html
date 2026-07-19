@@ -48,8 +48,24 @@
                 <ul>
                     <li><strong>Dynamic Kinematics:</strong> Developed custom horizontal and vertical collision resolution handlers to ensure precise entity placement within grid-based environments[cite: 3].</li>
                     <li><strong>Physics-Driven Mechanics:</strong> Implemented specialized movement logic, including double-jump physics and gravity-based vertical velocity calculations[cite: 3].</li>
-                   <li><strong>State-Driven World:</strong> Architected a multi-state game environment—including Menus, Cutscenes, and active Play states—with integrated pathfinding and boundary detection[cite: 1].</li>
+                    <li><strong>State-Driven World:</strong> Architected a multi-state game environment—including Menus, Cutscenes, and active Play states—with integrated pathfinding and boundary detection[cite: 1].</li>
                     <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/1VVmPrdk_AOQbzCgN-sH5L2BRu8hT6yvoroGlskcDWp8/edit?usp=sharing">Watch Project Functionality Video</a></li>
+                </ul>
+            </div>
+            
+            <!-- Drone Vision Entry -->
+            <div class="card project-card software">
+                <div class="card-header">
+                    <h3>Drone Vision: Autonomous Object Search</h3>
+                    <span class="badge badge-software">Python (YOLOv8/OpenCV)</span>
+                </div>
+                <p class="repo-meta">📂 <strong>Source Folder:</strong> <a href="https://github.com/Jai07-Dot/GamePortfolio/tree/main/DroneProject" target="_blank">/DroneProject</a></p>
+                <p>A real-time computer vision system engineered for aerial surveillance, utilizing deep-learning object detection to parse live video feeds for specific target identifiers.</p>
+                <ul>
+                    <li><strong>Adaptive Detection Pipeline:</strong> Integrated YOLOv8 inference models to perform high-speed object recognition on variable video inputs, including direct webcam streams and mirrored screen regions[cite: 4, 6].</li>
+                    <li><strong>Spatial Mapping & Coordinate Calibration:</strong> Developed a dedicated helper utility to isolate specific screen regions for capture, ensuring high-fidelity frame processing during active drone telemetry mirroring[cite: 6, 7].</li>
+                    <li><strong>Optimization & Reliability:</strong> Implemented fixed-position output windowing and non-blocking stream capture to prevent buffer stacking and visual overlap during intense detection cycles[cite: 6, 7].</li>
+                     <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/1AvfQy-BL2qpKPRXz1HlW7huUzHsrRpP4vBXo6bZLVNw/edit?usp=sharing" target="_blank">Watch Project Functionality Video</a></li>
                
                 </ul>
             </div>
@@ -116,7 +132,6 @@
         
                     </ul>
                 </div>
-                <!-- Other projects omitted for brevity -->
             </div>
         </section>
 
@@ -149,8 +164,24 @@
                     <p><strong>System Failure:</strong> During the transition to the game's finale, the engine failed to properly clear global variable buffers, leading to "ending separation" where the game would erroneously trigger both "Good" and "Bad" ending states simultaneously[cite: 1].</p>
                     <p><strong>Resolution:</strong> Decoupled the ending selection logic by introducing a definitive terminal-state check that locks the game into a specific branch based on the total death count calculation performed during the session[cite: 1].</p>
                 </div>
-                
-                <!-- Other existing errors here -->
+            </div>
+
+            <div class="card">
+                <h3 class="section-subtitle text-software">  Computer Vision Integration Errors</h3>
+
+                <div class="error-block">
+                    <h4>Project: Drone Vision — Window Overlap & Stack</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Dynamic output window placement caused GUI collisions with mirrored capture regions.</p>
+                    <p><strong>System Failure:</strong> By default, OpenCV's window manager would stack the detection feed on top of the mirrored drone window, obstructing the source area and causing recursive capture errors[cite: 6].</p>
+                    <p><strong>Resolution:</strong> Implemented <code>cv2.moveWindow</code> to force the detection output to a hardcoded coordinate offset, physically separating the detection visualization from the capture region[cite: 6].</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Drone Vision — Detection Latency</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Uncalibrated loop frequency during high-resolution screen capture.</p>
+                    <p><strong>System Failure:</strong> Improper handling of video source retrieval in the <code>mss</code> grab loop caused significant latency in real-time object tracking[cite: 6].</p>
+                    <p><strong>Resolution:</strong> Shifted to a direct NumPy-based frame conversion for the screen buffer, drastically reducing the overhead between capture and the YOLO inference pass[cite: 6].</p>
+                </div>
             </div>
         </section>
     </main>
