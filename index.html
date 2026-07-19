@@ -25,7 +25,7 @@
     <main class="container">
         
         <section id="about">
-            <h2>  Professional Summary</h2>
+            <h2>Professional Summary</h2>
             <hr>
             <div class="card summary-card">
                 <p>I am a Computer Engineering student focused on bridging the gap between low-level hardware constraints and high-level software architectures. Driven by a "build-to-learn" methodology, my portfolio represents an intensive engineering sprint where I transitioned foundational, linear scripts into complex, adaptive systems.</p>
@@ -34,7 +34,7 @@
         </section>
         
         <section id="portfolio-showcase">
-            <h2>  Engineering Project Index</h2>
+            <h2>Engineering Project Index</h2>
             <hr>
             
             <!-- Circles Versus Squares Entry -->
@@ -65,7 +65,7 @@
                     <li><strong>Adaptive Detection Pipeline:</strong> Integrated YOLOv8 inference models to perform high-speed object recognition on variable video inputs, including direct webcam streams and mirrored screen regions.</li>
                     <li><strong>Spatial Mapping & Coordinate Calibration:</strong> Developed a dedicated helper utility to isolate specific screen regions for capture, ensuring high-fidelity frame processing during active drone telemetry mirroring.</li>
                     <li><strong>Optimization & Reliability:</strong> Implemented fixed-position output windowing and non-blocking stream capture to prevent buffer stacking and visual overlap during intense detection cycles.</li>
-                    <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/1AvfQy-BL2qpKPRXz1HlW7huUzHsrRpP4vBXo6bZLVNw/edit?usp=sharing" target="_blank">Watch Project Functionality Video</a></li>
+                     <li><strong>Video Demonstration:</strong> <a href="https://docs.google.com/videos/d/1AvfQy-BL2qpKPRXz1HlW7huUzHsrRpP4vBXo6bZLVNw/edit?usp=sharing" target="_blank">Watch Project Functionality Video</a></li>
                 </ul>
             </div>
             
@@ -134,58 +134,50 @@
         </section>
 
         <section id="post-mortem">
-            <h2>  Hardware & Software Integration Post-Mortem</h2>
+            <h2>Hardware & Software Integration Post-Mortem</h2>
             <p class="section-intro">A precise log of core architectural vulnerabilities caught, diagnosed, and corrected during the development lifecycle.</p>
             <hr>
 
             <div class="card">
-                <h3 class="section-subtitle text-software">  Software & Game Engine Integration Failures</h3>
+                <h3 class="section-subtitle text-software">Software & Game Engine Integration Failures</h3>
                 
-                <!-- Circles vs Squares Failures -->
+                <div class="error-block">
+                    <h4>Project: The Haunted Waltz 5.0 — Narrative State Leakage</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Improper serialization of game-state terminal nodes leading to "ending separation" errors.</p>
+                    <p><strong>System Failure:</strong> During the transition to the finale, the engine failed to clear global variable buffers, causing the simultaneous trigger of both "Good" and "Bad" ending states.</p>
+                    <p><strong>Resolution:</strong> Decoupled ending logic by introducing a terminal-state check that locks the game into a specific branch based on the session's death count calculation.</p>
+                </div>
+
                 <div class="error-block">
                     <h4>Project: Circles vs. Squares — Falling Through Hole Logic</h4>
                     <p class="error-meta"><strong>Vulnerability:</strong> Misalignment between collision detection and gravity state updates.</p>
-                    <p><strong>System Failure:</strong> The player character would frequently ignore floor bounds and clip through platform edges when approaching at specific velocity vectors, causing a failure to trigger ground-state resets[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Refactored the vertical collision resolution to prioritize positional snap-backs to the platform top boundary immediately upon overlap detection, ensuring strict floor-contact logic[cite: 1].</p>
-                </div>
-
-                <div class="error-block">
-                    <h4>Project: Circles vs. Squares — Ending Separation</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Improper serialization of game-state terminal nodes.</p>
-                    <p><strong>System Failure:</strong> During the transition to the game's finale, the engine failed to properly clear global variable buffers, leading to "ending separation" where the game would erroneously trigger both "Good" and "Bad" ending states simultaneously[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Decoupled the ending selection logic by introducing a definitive terminal-state check that locks the game into a specific branch based on the total death count calculation performed during the session[cite: 1].</p>
-                </div>
-
-                <div class="error-block">
-                    <h4>Project: The Haunted Waltz 5.0 — Narrative State Leakage</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Improper serialization of game-state terminal nodes leading to "ending separation" errors[cite: 1].</p>
-                    <p><strong>System Failure:</strong> During the transition to the finale, the engine failed to clear global variable buffers, causing the simultaneous trigger of both "Good" and "Bad" ending states[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Decoupled ending logic by introducing a terminal-state check that locks the game into a specific branch based on the session's death count calculation[cite: 1].</p>
+                    <p><strong>System Failure:</strong> The player character would frequently ignore floor bounds and clip through platform edges when approaching at specific velocity vectors, causing a failure to trigger ground-state resets.</p>
+                    <p><strong>Resolution:</strong> Refactored the vertical collision resolution to prioritize positional snap-backs to the platform top boundary immediately upon overlap detection, ensuring strict floor-contact logic.</p>
                 </div>
             </div>
 
             <div class="card">
-                <h3 class="section-subtitle text-hardware">  Embedded Systems & Robotics Failures</h3>
-
-                <div class="error-block">
-                    <h4>Project: Drone Vision — Window Overlap & Latency</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> GUI collisions and uncalibrated loop frequency during high-resolution screen capture.</p>
-                    <p><strong>System Failure:</strong> OpenCV window stacking obstructed source areas, while improper <code>mss</code> grab loop handling caused significant tracking latency[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Implemented <code>cv2.moveWindow</code> to separate visuals and shifted to direct NumPy-based frame conversion to reduce capture overhead[cite: 1].</p>
-                </div>
+                <h3 class="section-subtitle text-hardware">Embedded Systems & Robotics Failures</h3>
 
                 <div class="error-block">
                     <h4>Project: Autonomous Robotic Tracking Pet — Asynchronous Timing Collisions</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Blocking loop execution causing motor driver jitter during sonar polling[cite: 1].</p>
-                    <p><strong>System Failure:</strong> Synchronous sonar processing halted the main execution loop, causing the dual H-bridge drivers to stutter when updating movement vectors[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Migrated to non-blocking <code>millis()</code> counters to manage motor and sensor timing independently, ensuring smooth asynchronous operation[cite: 1].</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Blocking loop execution causing motor driver jitter during sonar polling.</p>
+                    <p><strong>System Failure:</strong> Synchronous sonar processing halted the main execution loop, causing the dual H-bridge drivers to stutter when updating movement vectors.</p>
+                    <p><strong>Resolution:</strong> Migrated to non-blocking <code>millis()</code> counters to manage motor and sensor timing independently, ensuring smooth asynchronous operation.</p>
                 </div>
 
                 <div class="error-block">
                     <h4>Project: Interactive Desktop Pet — Register Contention</h4>
-                    <p class="error-meta"><strong>Vulnerability:</strong> Memory mapping collision between custom LCD character buffers and display control registers[cite: 1].</p>
-                    <p><strong>System Failure:</strong> Writing custom pixel matrices caused overflow into the LiquidCrystal driver's instruction register, resulting in screen flickering and corrupted facial expressions[cite: 1].</p>
-                    <p><strong>Resolution:</strong> Optimized custom character allocation by restricting memory mapping to dedicated CGRAM addresses, preventing instruction register corruption[cite: 1].</p>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Memory mapping collision between custom LCD character buffers and display control registers.</p>
+                    <p><strong>System Failure:</strong> Writing custom pixel matrices caused overflow into the LiquidCrystal driver's instruction register, resulting in screen flickering and corrupted facial expressions.</p>
+                    <p><strong>Resolution:</strong> Optimized custom character allocation by restricting memory mapping to dedicated CGRAM addresses, preventing instruction register corruption.</p>
+                </div>
+
+                <div class="error-block">
+                    <h4>Project: Drone Vision — Window Overlap & Stack</h4>
+                    <p class="error-meta"><strong>Vulnerability:</strong> Dynamic output window placement caused GUI collisions with mirrored capture regions.</p>
+                    <p><strong>System Failure:</strong> By default, OpenCV's window manager would stack the detection feed on top of the mirrored drone window, obstructing the source area and causing recursive capture errors.</p>
+                    <p><strong>Resolution:</strong> Implemented <code>cv2.moveWindow</code> to force the detection output to a hardcoded coordinate offset, physically separating the detection visualization from the capture region.</p>
                 </div>
             </div>
         </section>
