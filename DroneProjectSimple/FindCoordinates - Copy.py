@@ -17,8 +17,24 @@ How to use:
 Press Ctrl+C in the terminal to stop.
 """
 
+# =========================================================================
+# AUTHOR: Jaira Settles
+# PROJECT: Drone Vision Coordinate Finder
+# COPYRIGHT: (c) 2026 Jaira Settles. All Rights Reserved.
+# =========================================================================
+
+__author__ = "Jaira Settles"
+__version__ = "1.0.0"
+
 import pyautogui
 import time
+
+# Startup Watermark
+print("=" * 50)
+print(f" Coordinate Finder Helper | Author: {__author__}")
+print(f" Version: {__version__}")
+print(" Copyright (c) 2026 Jaira Settles. All Rights Reserved.")
+print("=" * 50)
 
 print("Move your mouse around the mirrored window.")
 print("Position will print every second. Press Ctrl+C to stop.\n")
@@ -26,7 +42,7 @@ print("Position will print every second. Press Ctrl+C to stop.\n")
 try:
     while True:
         x, y = pyautogui.position()
-        print(f"Mouse position: X={x}, Y={y}")
+        print(f"Mouse position: X={x}, Y={y} [{__author__} Utility]")
         time.sleep(1)
 except KeyboardInterrupt:
     print("\nStopped.")
