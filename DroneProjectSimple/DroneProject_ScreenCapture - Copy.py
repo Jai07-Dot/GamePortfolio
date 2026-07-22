@@ -15,10 +15,27 @@ BEFORE RUNNING:
 3. Fill in the REGION values below based on what you found.
 """
 
+# =========================================================================
+# AUTHOR: Jaira Settles
+# PROJECT: Drone Vision Object Search
+# COPYRIGHT: (c) 2026 Jaira Settles. All Rights Reserved.
+# =========================================================================
+
+__author__ = "Jaira Settles"
+__version__ = "1.0.0"
+
+import sys
 import cv2
 import numpy as np
 import mss
 from ultralytics import YOLO
+
+# Startup Watermark
+print("=" * 50)
+print(f" Core Vision Engine | Author: {__author__}")
+print(f" Version: {__version__}")
+print(" Copyright (c) 2026 Jaira Settles. All Rights Reserved.")
+print("=" * 50)
 
 # ---- SCREEN REGION SETTINGS ----
 # Update these based on FindCoordinates.py results.
@@ -44,7 +61,7 @@ print(f"Searching for '{target}'. Press 'q' in the video window to quit.")
 # This forces the output window to always appear in the same spot,
 # far from the REGION being captured, so it can never overlap it
 # and can't visually "stack" from leftover processes.
-WINDOW_NAME = "Drone Vision - Object Search (Screen Capture)"
+WINDOW_NAME = f"Drone Vision - Object Search [Dev: {__author__}]"
 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
 cv2.moveWindow(WINDOW_NAME, 50, 700)  # <-- adjust if this overlaps your mirror window
 
