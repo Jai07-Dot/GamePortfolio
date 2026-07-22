@@ -1,11 +1,22 @@
-    //Jaira Settles
-    import javax.swing.*;
-    import java.awt.*;
-    import java.awt.event.*;
-    import java.util.Random;
-    import javax.swing.Timer;
+/*
+ * =========================================================================
+ * AUTHOR: Jaira Settles
+ * PROJECT: The Haunted Waltz 5.0 (2D Grid Maze Engine)
+ * COPYRIGHT: (c) 2026 Jaira Settles. All Rights Reserved.
+ * =========================================================================
+ */
 
-    public class MazeGame extends JPanel implements KeyListener {
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Random;
+import javax.swing.Timer;
+
+public class MazeGame extends JPanel implements KeyListener {
+
+    // AUTHOR & VERSION CONSTANTS
+    public static final String AUTHOR = "Jaira Settles";
+    public static final String VERSION = "5.0.0";
 
     // 1. GAME SETTINGS
     private final int TILE_SIZE = 40;
@@ -187,7 +198,7 @@
         g2d.setColor(new Color(220, 220, 220));
         g2d.setFont(new Font("Monospaced", Font.PLAIN, 13));
         g2d.drawString(storyText, 20, (ROWS * TILE_SIZE) + 40);
-        g2d.drawString("Lives left: " + lives, 20, (ROWS * TILE_SIZE) + 70);
+        g2d.drawString("Lives left: " + lives + "  |  Developer: " + AUTHOR, 20, (ROWS * TILE_SIZE) + 70);
     }
 
     private void checkEncounter() {
@@ -318,7 +329,13 @@
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("The Haunted Waltz 5.0");
+        System.out.println("==================================================");
+        System.out.println(" Launching The Haunted Waltz " + VERSION);
+        System.out.println(" Developer: " + AUTHOR);
+        System.out.println(" Copyright (c) 2026 " + AUTHOR + ". All Rights Reserved.");
+        System.out.println("==================================================");
+
+        JFrame frame = new JFrame("The Haunted Waltz 5.0 - [Dev: " + AUTHOR + "]");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(new MazeGame());
         frame.pack();
