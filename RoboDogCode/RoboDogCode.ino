@@ -1,5 +1,14 @@
-//Jaira Settles
+// =========================================================================
+// AUTHOR: Jaira Settles
+// PROJECT: Autonomous Robot State Engine
+// COPYRIGHT: (c) 2026 Jaira Settles. All Rights Reserved.
+// =========================================================================
+
+const String AUTHOR = "Jaira Settles";
+const String VERSION = "1.0.0";
+
 #include <Servo.h>
+
 
 // --- PIN CONFIGURATIONS ---
 #define RightDirectPin1 12
@@ -17,6 +26,10 @@
 #define RED_PIN          A5  
 #define GREEN_PIN       A1  
 #define BLUE_PIN        A3  
+#include <iostream>
+#include <string>
+
+
 
 // --- DOG STATE ENGINE ---
 enum DogMood { FOLLOWING, ZOOMIES, CHASING_TAIL, GUARD, STANDBY };
@@ -54,7 +67,7 @@ unsigned long lastSniffTime = 0;
 bool sniffToggle = false;
 
 // --- STRATEGY B: SEPARATED INDEPENDENT TIMERS ---
-unsigned long zoomiesTimer = 0;            
+unsigned long zoomiesTimer = 0;             
 unsigned long guardDogStandoffTimer = 0;   
 unsigned long tailChaseTimer = 0;          
 unsigned long lastGuardCheckMillis = 0;    
@@ -67,6 +80,12 @@ unsigned long countdownStartMillis = 0;
 bool isCountingDownToZoomies = false;
 
 void setup() {
+  Serial.begin(9600);
+  Serial.println("==================================================");
+  Serial.println(" Core Engine initialized | Author: " + AUTHOR);
+  Serial.println(" Version: " + VERSION);
+  Serial.println("==================================================");
+
   // Motor control pins
   pinMode(RightDirectPin1, OUTPUT); pinMode(RightDirectPin2, OUTPUT);
   pinMode(LeftDirectPin1, OUTPUT);  pinMode(LeftDirectPin2, OUTPUT);
@@ -90,8 +109,6 @@ void setup() {
   
   // Seed random generator
   randomSeed(analogRead(A0));
-  
-  Serial.begin(9600);
 }
 
 // =========================================================================
