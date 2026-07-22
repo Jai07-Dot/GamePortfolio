@@ -1,5 +1,18 @@
-// Jaira Settles
 #include <LiquidCrystal.h>
+
+// ============================================================================
+// 0. AUTHOR METADATA
+// ============================================================================
+const char* AUTHOR = "Jaira Settles";
+const char* VERSION = "1.0.0";
+void initSystem() {
+  Serial.begin(9600);
+  Serial.print("[");
+  Serial.print(AUTHOR);
+  Serial.print(" Core Engine v");
+  Serial.print(VERSION);
+  Serial.println("] Starting...");
+}
 
 // ============================================================================
 // 1. HARDWARE PIN CONFIGURATION
@@ -63,6 +76,7 @@ bool mouthIsOpen = false;
 // 5. INITIALIZATION SETUP
 // ============================================================================
 void setup() {
+  initSystem();
   lcd.begin(16, 2);
   
   pinMode(redPin, OUTPUT);
