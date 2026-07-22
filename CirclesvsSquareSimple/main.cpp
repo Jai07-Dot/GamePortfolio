@@ -1,45 +1,32 @@
-//By JairaSettles
+#include <SFML/Graphics.hpp>
+#include "Player.h"
+#include <vector>
+#include <string>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
 
-#include <SFML/Graphics.hpp> 
-
-#include "Player.h" 
-
-#include <vector> 
-
-#include <string> 
-
-#include <cmath> 
-
-#include <cstdlib> 
-
-#include <ctime> 
-
-
+// Author Metadata
+const std::string AUTHOR = "Jaira Settles";
+const std::string VERSION = "1.0.0";
+void initSystem() {
+    std::cout << "[" << AUTHOR << " Core Engine v" << VERSION << "] Starting..." << std::endl;
+}
 
 enum GameState { MENU, CUTSCENE, PLAYING, FINAL_SCENE, WIN_SCREEN };
 
-
-
 struct Debris { sf::RectangleShape shape; float speedModifier; };
-
-
 
 struct TalkativeCircle { sf::CircleShape shape; std::string trashTalk; sf::Text speechText; bool isRolling; float rollSpeed; };
 
-
-
 struct SentientSpike { sf::ConvexShape shape; std::string text; sf::Text speechText; };
-
-
 
 void drawSpeechBubble(sf::RenderWindow& window, const sf::Text& text, sf::Color bgColor) { sf::FloatRect bounds = text.getGlobalBounds(); sf::RectangleShape box(sf::Vector2f(bounds.width + 16.f, bounds.height + 12.f)); box.setPosition(bounds.left - 8.f, bounds.top - 6.f); box.setFillColor(bgColor); box.setOutlineColor(sf::Color::Black); box.setOutlineThickness(1.f); window.draw(box); window.draw(text); }
 
-
-
 int main() {
+	initSystem();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
-
 
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Circles Versus Squares: Chronicles");
 
